@@ -1,69 +1,83 @@
-import { Metadata } from 'next';
+'use client';
+
 import AdminLayout from '@/components/admin/AdminLayout';
-
-export const metadata: Metadata = {
-  title: 'Admin Dashboard | ApotheCare',
-  description: 'Admin dashboard for ApotheCare pharmacy management',
-};
-
-type OrderStatus = 'Completed' | 'Processing' | 'Pending' | 'Cancelled';
-type ActivityType = 'purchase' | 'cancel' | 'account' | 'cart';
-
-interface Order {
-  id: string;
-  customer: string;
-  amount: string;
-  status: OrderStatus;
-  date: string;
-}
-
-interface Activity {
-  user: string;
-  action: string;
-  time: string;
-  type: ActivityType;
-}
-
-interface StatCardProps {
-  title: string;
-  value: string;
-  change: string;
-  trend: 'up' | 'down';
-  icon: string;
-}
+import { useState } from 'react';
 
 export default function AdminDashboard() {
+  // State for interactive elements
+  const [dateRange, setDateRange] = useState('today');
+
+  // This would be fetched from an API in a real application
+  const salesData = {
+    today: { orders: '1,284', revenue: '$42,389', products: '584', customers: '3,942' },
+    week: { orders: '5,367', revenue: '$168,945', products: '612', customers: '4,281' },
+    month: { orders: '18,902', revenue: '$531,478', products: '643', customers: '5,164' },
+    year: { orders: '156,729', revenue: '$4,218,397', products: '721', customers: '8,376' }
+  };
+
+  const data = salesData[dateRange as keyof typeof salesData];
+
   return (
     <AdminLayout 
       title="Dashboard" 
       subtitle="Welcome to the ApotheCare admin panel"
     >
+      {/* Date Range Selector */}
+      <div className="mb-6 flex justify-end">
+        <div className="inline-flex bg-white rounded-md shadow-sm">
+          <button 
+            onClick={() => setDateRange('today')} 
+            className={`px-4 py-2 text-sm font-medium ${dateRange === 'today' ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-50'} rounded-l-md`}
+          >
+            Today
+          </button>
+          <button 
+            onClick={() => setDateRange('week')} 
+            className={`px-4 py-2 text-sm font-medium ${dateRange === 'week' ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-50'} border-l border-gray-200`}
+          >
+            This Week
+          </button>
+          <button 
+            onClick={() => setDateRange('month')} 
+            className={`px-4 py-2 text-sm font-medium ${dateRange === 'month' ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-50'} border-l border-gray-200`}
+          >
+            This Month
+          </button>
+          <button 
+            onClick={() => setDateRange('year')} 
+            className={`px-4 py-2 text-sm font-medium ${dateRange === 'year' ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-50'} border-l border-gray-200 rounded-r-md`}
+          >
+            This Year
+          </button>
+        </div>
+      </div>
+
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard 
           title="Total Orders" 
-          value="1,284" 
+          value={data.orders} 
           change="+12.5%" 
           trend="up" 
           icon="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
         />
         <StatCard 
           title="Revenue" 
-          value="$42,389" 
+          value={data.revenue} 
           change="+8.2%" 
           trend="up" 
           icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
         />
         <StatCard 
           title="Products" 
-          value="584" 
+          value={data.products} 
           change="+3.1%" 
           trend="up" 
           icon="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
         />
         <StatCard 
           title="Customers" 
-          value="3,942" 
+          value={data.customers} 
           change="+5.4%" 
           trend="up" 
           icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
@@ -75,7 +89,10 @@ export default function AdminDashboard() {
         <div className="lg:col-span-2 bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 className="text-lg font-medium text-gray-800">Recent Orders</h3>
-            <button className="text-primary hover:text-primary-dark text-sm font-medium">
+            <button 
+              onClick={() => window.location.href = '/admin/orders'} 
+              className="text-primary hover:text-primary-dark text-sm font-medium"
+            >
               View All
             </button>
           </div>
@@ -103,7 +120,7 @@ export default function AdminDashboard() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
+                  <tr key={order.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => alert(`View details for order #${order.id}`)}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
                       #{order.id}
                     </td>
@@ -176,6 +193,17 @@ export default function AdminDashboard() {
 }
 
 // Components and sample data
+type StatusType = 'Completed' | 'Processing' | 'Pending' | 'Cancelled';
+type ActivityType = 'purchase' | 'cancel' | 'account' | 'cart';
+
+interface StatCardProps {
+  title: string;
+  value: string;
+  change: string;
+  trend: 'up' | 'down';
+  icon: string;
+}
+
 function StatCard({ title, value, change, trend, icon }: StatCardProps) {
   return (
     <div className="bg-white rounded-lg shadow p-6">
@@ -205,26 +233,26 @@ function StatCard({ title, value, change, trend, icon }: StatCardProps) {
 }
 
 // Sample data
-const recentOrders: Order[] = [
-  { id: '12345', customer: 'Sarah Johnson', amount: '89.99', status: 'Completed', date: 'May 25, 2023' },
-  { id: '12346', customer: 'Michael Brown', amount: '142.50', status: 'Processing', date: 'May 24, 2023' },
-  { id: '12347', customer: 'Emily Davis', amount: '74.25', status: 'Pending', date: 'May 24, 2023' },
-  { id: '12348', customer: 'Robert Wilson', amount: '215.00', status: 'Completed', date: 'May 23, 2023' },
-  { id: '12349', customer: 'Jennifer Lee', amount: '56.75', status: 'Cancelled', date: 'May 23, 2023' },
+const recentOrders = [
+  { id: '12345', customer: 'Sarah Johnson', amount: '89.99', status: 'Completed' as StatusType, date: 'May 25, 2023' },
+  { id: '12346', customer: 'Michael Brown', amount: '142.50', status: 'Processing' as StatusType, date: 'May 24, 2023' },
+  { id: '12347', customer: 'Emily Davis', amount: '74.25', status: 'Pending' as StatusType, date: 'May 24, 2023' },
+  { id: '12348', customer: 'Robert Wilson', amount: '215.00', status: 'Completed' as StatusType, date: 'May 23, 2023' },
+  { id: '12349', customer: 'Jennifer Lee', amount: '56.75', status: 'Cancelled' as StatusType, date: 'May 23, 2023' },
 ];
 
-const statusColors: Record<OrderStatus, string> = {
+const statusColors: Record<StatusType, string> = {
   'Completed': 'bg-green-100 text-green-800',
   'Processing': 'bg-blue-100 text-blue-800',
   'Pending': 'bg-yellow-100 text-yellow-800',
   'Cancelled': 'bg-red-100 text-red-800',
 };
 
-const activities: Activity[] = [
-  { user: 'Jennifer Lee', action: 'cancelled order #12349', time: '2 hours ago', type: 'cancel' },
-  { user: 'Robert Wilson', action: 'completed checkout for $215.00', time: '5 hours ago', type: 'purchase' },
-  { user: 'Emily Davis', action: 'created a new account', time: '1 day ago', type: 'account' },
-  { user: 'Michael Brown', action: 'added 3 items to cart', time: '1 day ago', type: 'cart' },
+const activities = [
+  { user: 'Jennifer Lee', action: 'cancelled order #12349', time: '2 hours ago', type: 'cancel' as ActivityType },
+  { user: 'Robert Wilson', action: 'completed checkout for $215.00', time: '5 hours ago', type: 'purchase' as ActivityType },
+  { user: 'Emily Davis', action: 'created a new account', time: '1 day ago', type: 'account' as ActivityType },
+  { user: 'Michael Brown', action: 'added 3 items to cart', time: '1 day ago', type: 'cart' as ActivityType },
 ];
 
 const activityTypeColors: Record<ActivityType, string> = {
