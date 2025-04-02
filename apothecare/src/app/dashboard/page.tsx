@@ -1,6 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ScrollButton } from '../../components/ui/ScrollButton';
+import { ExpandableProductsSection } from '../../components/ui/ExpandableProductsSection';
+import { featuredProducts, allProducts } from '../../data/products';
+import { HeaderNavigation } from '../../components/ui/HeaderNavigation';
+import { HeaderCartButton } from '../../components/ui/HeaderCartButton';
 
 export const metadata: Metadata = {
   title: 'Dashboard | ApotheCare',
@@ -12,29 +17,19 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-5 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-9 h-9 text-primary">
               <path d="M11.25 3v4.046a3 3 0 00-4.277 4.204H1.5v-6A2.25 2.25 0 013.75 3h7.5zM12.75 3v4.011a3 3 0 014.239 4.239H22.5v-6A2.25 2.25 0 0020.25 3h-7.5zM22.5 12.75h-8.983a4.125 4.125 0 004.108 3.75.75.75 0 010 1.5 5.623 5.623 0 01-4.875-2.817V21h7.5a2.25 2.25 0 002.25-2.25v-6zM11.25 21v-5.817A5.623 5.623 0 016.375 18a.75.75 0 010-1.5 4.126 4.126 0 004.108-3.75H1.5v6A2.25 2.25 0 003.75 21h7.5z" />
               <path d="M11.085 10.354c.03.297.038.575.036.805a7.484 7.484 0 01-.805-.036c-.833-.084-1.677-.325-2.195-.843a1.5 1.5 0 012.122-2.12c.517.517.759 1.36.842 2.194zM12.877 10.354c-.03.297-.038.575-.036.805.23.002.508-.006.805-.036.833-.084 1.677-.325 2.195-.843A1.5 1.5 0 0013.72 8.16c-.518.518-.76 1.362-.843 2.194z" />
             </svg>
             <span className="text-2xl font-bold text-gray-800">ApotheCare</span>
           </div>
-          <nav className="hidden md:block">
-            <ul className="flex space-x-8">
-              <li><Link href="/dashboard" className="text-primary font-medium hover:text-primary-dark transition">Home</Link></li>
-              <li><Link href="#products" className="text-gray-600 font-medium hover:text-primary transition">Products</Link></li>
-              <li><Link href="#orders" className="text-gray-600 font-medium hover:text-primary transition">Orders</Link></li>
-              <li><Link href="#profile" className="text-gray-600 font-medium hover:text-primary transition">Profile</Link></li>
-            </ul>
-          </nav>
+          
+          <HeaderNavigation />
+          
           <div className="flex items-center space-x-4">
-            <div className="relative">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 text-gray-600 hover:text-primary cursor-pointer">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-              </svg>
-              <span className="absolute -top-2 -right-2 bg-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">3</span>
-            </div>
+            <HeaderCartButton />
             <div className="h-8 w-8 rounded-full bg-primary/20 text-primary font-medium flex items-center justify-center">
               JD
             </div>
@@ -46,7 +41,7 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main>
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-primary/10 to-primary/5 py-16">
+        <section className="bg-gradient-to-r from-primary/10 to-primary/5 py-32 min-h-[100vh] flex items-center">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center gap-12">
               <div className="md:w-1/2 space-y-6">
@@ -58,9 +53,12 @@ export default function DashboardPage() {
                   ApotheCare delivers prescription medications and healthcare products right to your door, with expert pharmacist support available 24/7.
                 </p>
                 <div className="flex flex-wrap gap-4">
-                  <button className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-md font-medium transition shadow-md hover:shadow-lg">
+                  <ScrollButton 
+                    targetId="products" 
+                    className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-md font-medium transition shadow-md hover:shadow-lg inline-block"
+                  >
                     Browse Products
-                  </button>
+                  </ScrollButton>
                   <button className="border border-primary text-primary hover:bg-primary/5 px-6 py-3 rounded-md font-medium transition">
                     View Prescriptions
                   </button>
@@ -80,12 +78,12 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <div className="md:w-1/2 relative h-[400px] w-full">
+              <div className="md:w-1/2 relative h-[450px] w-full">
                 <div className="absolute top-0 right-0 w-full h-full bg-primary/10 rounded-2xl -z-10"></div>
                 <div className="absolute top-6 right-6 w-full h-full bg-primary/5 rounded-2xl -z-20"></div>
                 <div className="relative h-full w-full flex items-center justify-center bg-white rounded-xl shadow-xl overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-tr from-primary-light/10 to-primary/20"></div>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-32 h-32 text-primary/30">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-40 h-40 text-primary/30">
                     <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
                   </svg>
                 </div>
@@ -95,10 +93,10 @@ export default function DashboardPage() {
         </section>
 
         {/* Services Section */}
-        <section className="py-16 bg-white">
+        <section id="services" className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800">Our Services</h2>
+              <h2 className="text-3xl font-bold text-gray-800">Our <span className="text-primary">Services</span></h2>
               <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
                 We provide comprehensive healthcare solutions to help you stay healthy and manage your medications effectively.
               </p>
@@ -157,272 +155,15 @@ export default function DashboardPage() {
         </section>
 
         {/* Featured Products */}
-        <section className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="flex justify-between items-end mb-8">
-              <div>
-                <h2 className="text-3xl font-bold text-gray-800">Featured Products</h2>
-                <p className="text-gray-600 mt-2">Premium healthcare products curated for your needs</p>
-              </div>
-              <button className="text-primary font-medium flex items-center hover:text-primary-dark transition">
-                View All Products
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 ml-1">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Product 1 */}
-              <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden group">
-                <div className="relative">
-                  <div className="h-48 bg-gradient-to-br from-primary-light/20 to-primary/10 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-24 h-24 text-primary/40">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-                    </svg>
-                  </div>
-                  <div className="absolute top-2 right-2 bg-primary text-white text-xs font-bold py-1 px-2 rounded">
-                    20% OFF
-                  </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-1 mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-xs text-gray-500 ml-1">(42)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-800">Vitamin D3 Complex</h3>
-                    <span className="text-sm text-primary-dark font-medium px-2 py-1 bg-primary/10 rounded">Vitamins</span>
-                  </div>
-                  <p className="text-gray-600 text-sm mt-2">High-potency vitamin D3 with K2 for optimal calcium absorption and immune support.</p>
-                  <div className="mt-3 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1 text-primary">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      5000 IU per serving
-                    </div>
-                    <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1 text-primary">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      60 capsules
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center mt-4">
-                    <div>
-                      <span className="text-gray-400 line-through text-sm">€29.99</span>
-                      <span className="text-primary font-bold ml-2">€23.99</span>
-                    </div>
-                    <button className="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded text-sm font-medium transition-colors">
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Product 2 */}
-              <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden group">
-                <div className="relative">
-                  <div className="h-48 bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-24 h-24 text-blue-400">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-1 mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-yellow-400">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                    </svg>
-                    <span className="text-xs text-gray-500 ml-1">(28)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-800">Omega-3 Fish Oil</h3>
-                    <span className="text-sm text-blue-600 font-medium px-2 py-1 bg-blue-50 rounded">Supplements</span>
-                  </div>
-                  <p className="text-gray-600 text-sm mt-2">Pharmaceutical-grade fish oil with high EPA and DHA content for heart and brain health.</p>
-                  <div className="mt-3 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1 text-blue-500">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      1000mg per serving
-                    </div>
-                    <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1 text-blue-500">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      90 softgels
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center mt-4">
-                    <div>
-                      <span className="text-primary font-bold">€32.99</span>
-                    </div>
-                    <button className="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded text-sm font-medium transition-colors">
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Product 3 */}
-              <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden group">
-                <div className="relative">
-                  <div className="h-48 bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-24 h-24 text-green-400">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                    </svg>
-                  </div>
-                  <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold py-1 px-2 rounded">
-                    NEW
-                  </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-1 mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <span className="text-xs text-gray-500 ml-1">(17)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-800">Probiotic Complex</h3>
-                    <span className="text-sm text-green-600 font-medium px-2 py-1 bg-green-50 rounded">Digestive</span>
-                  </div>
-                  <p className="text-gray-600 text-sm mt-2">Advanced multi-strain probiotic formula with 50 billion CFU for optimal gut health.</p>
-                  <div className="mt-3 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1 text-green-500">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      50 billion CFU
-                    </div>
-                    <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1 text-green-500">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      30 capsules
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center mt-4">
-                    <div>
-                      <span className="text-primary font-bold">€45.99</span>
-                    </div>
-                    <button className="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded text-sm font-medium transition-colors">
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Product 4 */}
-              <div className="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden group">
-                <div className="relative">
-                  <div className="h-48 bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-24 h-24 text-purple-400">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-                    </svg>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center gap-1 mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-4 h-4 text-yellow-400">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                    </svg>
-                    <span className="text-xs text-gray-500 ml-1">(35)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-800">Melatonin Complex</h3>
-                    <span className="text-sm text-purple-600 font-medium px-2 py-1 bg-purple-50 rounded">Sleep Aid</span>
-                  </div>
-                  <p className="text-gray-600 text-sm mt-2">Extended-release melatonin with L-theanine for better sleep quality and relaxation.</p>
-                  <div className="mt-3 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1 text-purple-500">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      5mg per tablet
-                    </div>
-                    <div className="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 mr-1 text-purple-500">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      60 tablets
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center mt-4">
-                    <div>
-                      <span className="text-primary font-bold">€18.99</span>
-                    </div>
-                    <button className="bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded text-sm font-medium transition-colors">
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <section id="products" className="py-16 bg-gray-50">
+          <ExpandableProductsSection featuredProducts={featuredProducts} allProducts={allProducts} />
         </section>
 
         {/* Testimonials Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800">What Our Customers Say</h2>
+              <h2 className="text-3xl font-bold text-gray-800">What Our Customers <span className="text-primary">Say</span></h2>
               <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
                 Thousands of people trust ApotheCare for their healthcare needs. Read what they have to say about our service.
               </p>
@@ -498,6 +239,70 @@ export default function DashboardPage() {
                     <h4 className="font-medium text-gray-800">Sophia Patel</h4>
                     <p className="text-gray-500 text-sm">Satisfied Customer</p>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Orders Section (Empty placeholder) */}
+        <section id="orders" className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-800">Your <span className="text-primary">Orders</span></h2>
+              <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
+                Track and manage your medication orders and prescriptions all in one place.
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-md p-12 text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1} stroke="currentColor" className="w-20 h-20 text-gray-300 mx-auto mb-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              <h3 className="text-xl font-medium text-gray-800 mb-2">No orders yet</h3>
+              <p className="text-gray-600 mb-6">Start shopping to see your orders here.</p>
+              <Link href="#products" className="text-primary font-medium hover:text-primary-dark transition">
+                Browse Products
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Profile Section (Empty placeholder) */}
+        <section id="profile" className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-800">Your <span className="text-primary">Profile</span></h2>
+              <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
+                Manage your personal information, health details, and account settings.
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 rounded-xl shadow-md p-12 max-w-3xl mx-auto">
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                <div className="w-32 h-32 bg-primary/20 rounded-full flex items-center justify-center text-primary text-3xl font-bold">
+                  JD
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">John Doe</h3>
+                  <p className="text-gray-500 mb-4">john.doe@example.com</p>
+                  <div className="space-y-2 mb-6">
+                    <div className="flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-primary">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
+                      </svg>
+                      <span>Member since: Jan 2023</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-primary">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                      </svg>
+                      <span>Total orders: 0</span>
+                    </div>
+                  </div>
+                  <button className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-medium transition">
+                    Edit Profile
+                  </button>
                 </div>
               </div>
             </div>
