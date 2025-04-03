@@ -131,7 +131,9 @@ export const cartAPI = {
                     sale_price: item.product.sale_price ? parseFloat(item.product.sale_price) : undefined,
                     rating: parseFloat(item.product.rating),
                     reviews: parseInt(item.product.reviews),
-                    properties: item.product.properties ? JSON.parse(item.product.properties) : {},
+                    properties: typeof item.product.properties === 'string' 
+                        ? JSON.parse(item.product.properties)
+                        : item.product.properties || {},
                     is_new: Boolean(item.product.is_new),
                     is_featured: Boolean(item.product.is_featured)
                 }

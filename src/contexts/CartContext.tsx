@@ -51,7 +51,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       setError(null);
       const newItem = await cartAPI.addItem(product.id, quantity);
-      setItems(prev => [...prev, newItem]);
+      setItems(prev => {
+        const existingItemIndex = prev.findIndex(item => item.product.id === product.id);
+        if (existingItemIndex >= 0) {
+          const updatedItems = [...prev];
+          updatedItems[existingItemIndex] = {
+            ...updatedItems[existingItemIndex],
+            quantity: updatedItems[existingItemIndex].quantity + quantity
+          };
+          return updatedItems;
+        }
+        return [...prev, newItem];
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to add item to cart');
       throw err;
