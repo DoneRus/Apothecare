@@ -6,6 +6,7 @@ import { ExpandableProductsSection } from '../../components/ui/ExpandableProduct
 import { featuredProducts, allProducts } from '../../data/products';
 import { HeaderNavigation } from '../../components/ui/HeaderNavigation';
 import { HeaderCartButton } from '../../components/ui/HeaderCartButton';
+import ChatbotWrapper from '../../components/ui/ChatbotWrapper';
 
 export const metadata: Metadata = {
   title: 'Dashboard | ApotheCare',
@@ -433,6 +434,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </footer>
+
+      {/* Chatbot */}
+      <ChatbotWrapper />
     </div>
   );
 } 
