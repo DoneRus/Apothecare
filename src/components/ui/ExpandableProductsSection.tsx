@@ -33,37 +33,8 @@ export function ExpandableProductsSection({
           productsAPI.getAll()
         ]);
         
-        // Transform data to match our Product type if needed
-        const formattedFeatured = featured.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          category: item.category,
-          description: item.description,
-          rating: item.rating,
-          reviews: item.reviews,
-          price: item.price,
-          salePrice: item.sale_price || null,
-          discount: item.discount || null,
-          isNew: item.is_new || false,
-          properties: item.properties || {}
-        }));
-        
-        const formattedAll = all.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          category: item.category,
-          description: item.description,
-          rating: item.rating,
-          reviews: item.reviews,
-          price: item.price,
-          salePrice: item.sale_price || null,
-          discount: item.discount || null,
-          isNew: item.is_new || false,
-          properties: item.properties || {}
-        }));
-        
-        setFeaturedProducts(formattedFeatured);
-        setAllProducts(formattedAll);
+        setFeaturedProducts(featured);
+        setAllProducts(all);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching products:', err);
@@ -87,17 +58,13 @@ export function ExpandableProductsSection({
   
   // Function to handle adding product to cart
   const handleAddToCart = async (product: Product) => {
-    setAnimatingProduct(product);
     try {
+      setAnimatingProduct(product);
       await addItem(product, 1);
     } catch (error) {
       console.error('Failed to add item to cart:', error);
+      // You might want to show an error toast here
     }
-    
-    // Clear animating product after animation completes
-    setTimeout(() => {
-      setAnimatingProduct(null);
-    }, 1000);
   };
 
   const toggleExpanded = () => {
@@ -105,32 +72,12 @@ export function ExpandableProductsSection({
   };
 
   const getColorClasses = (product: Product) => {
-    // Default classes
-    let bgClass = 'bg-gray-100';
-    let textClass = 'text-gray-900';
-    let buttonClass = 'bg-primary text-white';
-    let hoverClass = 'hover:bg-primary-dark';
-    
-    // Special handling for primary color
-    if (product.properties?.color === 'primary') {
-      return {
-        bgClass: 'bg-primary/10',
-        textClass: 'text-primary-dark',
-        buttonClass: 'bg-primary text-white',
-        hoverClass: 'hover:bg-primary-dark'
-      };
-    }
-    
-    // Handle color based on product properties
-    if (product.properties?.color) {
-      const color = product.properties.color;
-      bgClass = `bg-${color}-100`;
-      textClass = `text-${color}-900`;
-      buttonClass = `bg-${color}-500 text-white`;
-      hoverClass = `hover:bg-${color}-600`;
-    }
-    
-    return { bgClass, textClass, buttonClass, hoverClass };
+    return {
+      bgClass: 'bg-white',
+      textClass: 'text-gray-900',
+      buttonClass: 'bg-blue-600 text-white',
+      hoverClass: 'hover:bg-blue-700'
+    };
   };
 
   const getCategoryIcon = (category: string) => {
@@ -224,7 +171,10 @@ export function ExpandableProductsSection({
     <div className="relative">
       {/* Add to cart animation */}
       {animatingProduct && (
-        <AddToCartAnimation product={animatingProduct} />
+        <AddToCartAnimation 
+          product={animatingProduct} 
+          onComplete={() => setAnimatingProduct(null)}
+        />
       )}
       
       <div className="py-16 bg-gray-50">
@@ -252,9 +202,20 @@ export function ExpandableProductsSection({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.3 }}
-                    className={`${bgClass} rounded-xl shadow-md overflow-hidden`}
+                    className={`${bgClass} rounded-xl shadow-md overflow-hidden flex flex-col`}
                   >
-                    <div className="p-6">
+                    {/* Product Image */}
+                    {product.image_url && (
+                      <div className="aspect-square overflow-hidden">
+                        <img 
+                          src={product.image_url} 
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="p-6 flex flex-col flex-grow">
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center space-x-2">
                           <span className={`p-1.5 rounded-full ${textClass} bg-white/80`}>
@@ -265,12 +226,10 @@ export function ExpandableProductsSection({
                           </span>
                         </div>
                         
-                        {/* New or Discount label */}
-                        {product.isNew ? (
+                        {/* New label */}
+                        {product.is_new && (
                           <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">New</span>
-                        ) : product.discount ? (
-                          <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">-{product.discount}%</span>
-                        ) : null}
+                        )}
                       </div>
                       
                       <h3 className="text-xl font-bold mb-2 text-gray-800">{product.name}</h3>
@@ -286,28 +245,30 @@ export function ExpandableProductsSection({
                         <span className="text-xs text-gray-500">({product.reviews})</span>
                       </div>
                       
-                      <p className="text-gray-600 text-sm mb-6 line-clamp-2">{product.description}</p>
+                      <p className="text-gray-600 text-sm mb-6 line-clamp-2 flex-grow">{product.description}</p>
                       
-                      <div className="flex justify-between items-center">
-                        <div>
-                          {product.salePrice ? (
-                            <div className="flex items-center space-x-2">
-                              <span className="text-lg font-bold text-gray-800">${product.salePrice.toFixed(2)}</span>
-                              <span className="text-sm text-gray-500 line-through">${product.price.toFixed(2)}</span>
-                            </div>
-                          ) : (
-                            <span className="text-lg font-bold text-gray-800">${product.price.toFixed(2)}</span>
-                          )}
+                      <div className="mt-auto">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            {product.sale_price ? (
+                              <div className="flex items-center space-x-2">
+                                <span className="text-lg font-bold text-gray-800">${product.sale_price.toFixed(2)}</span>
+                                <span className="text-sm text-gray-500 line-through">${product.price.toFixed(2)}</span>
+                              </div>
+                            ) : (
+                              <span className="text-lg font-bold text-gray-800">${product.price.toFixed(2)}</span>
+                            )}
+                          </div>
                         </div>
                         
                         <button 
                           disabled={cartLoading}
                           onClick={() => handleAddToCart(product)}
-                          className={`px-4 py-2 rounded-lg ${buttonClass} ${hoverClass} transition-colors duration-200 flex items-center space-x-1 disabled:opacity-70 disabled:cursor-not-allowed`}
+                          className={`px-4 py-2 rounded-lg ${buttonClass} ${hoverClass} transition-colors duration-200 flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed w-full`}
                         >
                           {cartLoading ? (
                             <>
-                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                               </svg>
@@ -331,7 +292,7 @@ export function ExpandableProductsSection({
           </AnimatePresence>
           
           {/* Expand/Collapse Button - only show if we have additional products */}
-          {allProducts.length > featuredProducts.length && (
+          {allProducts.length > 6 && (
             <div className="flex justify-center mt-10">
               <button
                 onClick={toggleExpanded}

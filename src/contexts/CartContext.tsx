@@ -10,13 +10,13 @@ type CartItem = {
   quantity: number;
 };
 
-type CartContextType = {
+export type CartContextType = {
   items: CartItem[];
   addItem: (product: Product, quantity: number) => Promise<void>;
-  removeItem: (cartItemId: number) => Promise<void>;
-  updateQuantity: (cartItemId: number, quantity: number) => Promise<void>;
+  removeItem: (productId: number) => Promise<void>;
+  updateQuantity: (productId: number, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
-  isLoading: boolean;
+  loading: boolean;
   error: string | null;
   itemCount: number;
   totalPrice: number;
@@ -24,9 +24,9 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Calculate derived values
@@ -39,7 +39,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Fetch cart items on component mount
   useEffect(() => {
     const fetchCartItems = async () => {
-      setIsLoading(true);
+      setLoading(true);
       setError(null);
       try {
         const cartItems = await cartAPI.getItems();
@@ -66,7 +66,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error fetching cart:', err);
         setError('Failed to load cart items');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
@@ -75,7 +75,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Add item to cart
   const addItem = async (product: Product, quantity: number) => {
-    setIsLoading(true);
+    setLoading(true);
     setError(null);
     
     try {
@@ -106,13 +106,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error adding item to cart:', err);
       setError('Failed to add item to cart');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   // Remove item from cart
   const removeItem = async (cartItemId: number) => {
-    setIsLoading(true);
+    setLoading(true);
     setError(null);
     
     try {
@@ -122,7 +122,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error removing item from cart:', err);
       setError('Failed to remove item from cart');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -138,7 +138,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
     
-    setIsLoading(true);
+    setLoading(true);
     setError(null);
     
     try {
@@ -171,13 +171,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error updating cart item:', err);
       setError('Failed to update cart item');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   // Clear cart
   const clearCart = async () => {
-    setIsLoading(true);
+    setLoading(true);
     setError(null);
     
     try {
@@ -187,7 +187,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error clearing cart:', err);
       setError('Failed to clear cart');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -199,7 +199,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         removeItem,
         updateQuantity,
         clearCart,
-        isLoading,
+        loading,
         error,
         itemCount,
         totalPrice
@@ -208,7 +208,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </CartContext.Provider>
   );
-};
+}
 
 export const useCart = () => {
   const context = useContext(CartContext);

@@ -39,6 +39,8 @@ $sql = "CREATE TABLE IF NOT EXISTS products (
     rating DECIMAL(3, 2) DEFAULT 0,
     reviews INT DEFAULT 0,
     is_new BOOLEAN DEFAULT FALSE,
+    is_featured BOOLEAN DEFAULT FALSE,
+    image_url VARCHAR(255),
     properties JSON,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )";
@@ -89,15 +91,15 @@ $productCount = $row['count'];
 // Insert sample products if none exist
 if ($productCount == 0) {
     // Sample products from your frontend data
-    $productsSQL = "INSERT INTO products (name, category, description, price, rating, reviews, is_new, properties) VALUES
-    ('Vitamin D3 Complex', 'Vitamins', 'High-potency vitamin D supplement for immune support and bone health.', 24.99, 4.8, 127, FALSE, '{\"color\":\"amber\",\"icon\":\"pill\"}'),
-    ('Omega-3 Fish Oil', 'Supplements', 'Pharmaceutical-grade fish oil with EPA and DHA for heart and brain health.', 29.99, 4.9, 215, FALSE, '{\"color\":\"blue\",\"icon\":\"capsule\"}'),
-    ('Probiotic Complex', 'Digestive', 'Multi-strain probiotic formula for gut health and immune support.', 34.99, 4.7, 98, TRUE, '{\"color\":\"green\",\"icon\":\"capsule\"}'),
-    ('Melatonin Complex', 'Sleep Aid', 'Extended-release melatonin formula for quality sleep support.', 19.99, 4.6, 78, FALSE, '{\"color\":\"purple\",\"icon\":\"pill\"}'),
-    ('Multivitamin Complete', 'Vitamins', 'Comprehensive daily multivitamin with essential nutrients and minerals.', 39.99, 4.8, 189, FALSE, '{\"color\":\"amber\",\"icon\":\"tablet\"}'),
-    ('Magnesium Glycinate', 'Minerals', 'Highly absorbable magnesium for muscle and nerve function.', 27.99, 4.7, 110, FALSE, '{\"color\":\"blue\",\"icon\":\"tablet\"}'),
-    ('CoQ10 Ubiquinol', 'Heart Health', 'Enhanced absorption CoQ10 for heart health and energy production.', 45.99, 4.9, 76, TRUE, '{\"color\":\"red\",\"icon\":\"softgel\"}'),
-    ('Zinc Picolinate', 'Minerals', 'High-potency zinc supplement for immune support and skin health.', 18.99, 4.6, 92, FALSE, '{\"color\":\"gray\",\"icon\":\"tablet\"}')";
+    $productsSQL = "INSERT INTO products (name, category, description, price, rating, reviews, is_new, is_featured, image_url, properties) VALUES
+    ('Vitamin D3 Complex', 'Vitamins', 'High-potency vitamin D supplement for immune support and bone health.', 24.99, 4.8, 127, FALSE, TRUE, '/images/products/vitamin-d3.jpg', '{\"color\":\"amber\",\"icon\":\"pill\"}'),
+    ('Omega-3 Fish Oil', 'Supplements', 'Pharmaceutical-grade fish oil with EPA and DHA for heart and brain health.', 29.99, 4.9, 215, FALSE, TRUE, '/images/products/omega-3.jpg', '{\"color\":\"blue\",\"icon\":\"capsule\"}'),
+    ('Probiotic Complex', 'Digestive', 'Multi-strain probiotic formula for gut health and immune support.', 34.99, 4.7, 98, TRUE, TRUE, '/images/products/probiotic.jpg', '{\"color\":\"green\",\"icon\":\"capsule\"}'),
+    ('Melatonin Complex', 'Sleep Aid', 'Extended-release melatonin formula for quality sleep support.', 19.99, 4.6, 78, FALSE, TRUE, '/images/products/melatonin.jpg', '{\"color\":\"purple\",\"icon\":\"pill\"}'),
+    ('Multivitamin Complete', 'Vitamins', 'Comprehensive daily multivitamin with essential nutrients and minerals.', 39.99, 4.8, 189, FALSE, TRUE, '/images/products/multivitamin.jpg', '{\"color\":\"amber\",\"icon\":\"tablet\"}'),
+    ('Magnesium Glycinate', 'Minerals', 'Highly absorbable magnesium for muscle function and nervous system support.', 27.99, 4.7, 110, FALSE, TRUE, '/images/products/magnesium.jpg', '{\"color\":\"blue\",\"icon\":\"tablet\"}'),
+    ('CoQ10 Ubiquinol', 'Heart Health', 'Enhanced absorption CoQ10 for heart health and energy production.', 45.99, 4.9, 76, TRUE, FALSE, '/images/products/coq10.jpg', '{\"color\":\"red\",\"icon\":\"softgel\"}'),
+    ('Zinc Picolinate', 'Minerals', 'High-potency zinc supplement for immune support and skin health.', 18.99, 4.6, 92, FALSE, FALSE, '/images/products/zinc.jpg', '{\"color\":\"gray\",\"icon\":\"tablet\"}')";
     
     if ($conn->query($productsSQL) === TRUE) {
         $message[] = "Sample products inserted successfully";
@@ -129,6 +131,22 @@ if ($testimonialCount == 0) {
     } else {
         $message[] = "Error inserting sample testimonials: " . $conn->error;
     }
+}
+
+// Add is_featured column if it doesn't exist
+$sql = "ALTER TABLE products ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE";
+if ($conn->query($sql) === TRUE) {
+    $message[] = "Added is_featured column to products table";
+} else {
+    $message[] = "Error adding is_featured column: " . $conn->error;
+}
+
+// Update some products as featured
+$sql = "UPDATE products SET is_featured = TRUE WHERE id IN (1, 2, 3, 4)";
+if ($conn->query($sql) === TRUE) {
+    $message[] = "Updated featured products";
+} else {
+    $message[] = "Error updating featured products: " . $conn->error;
 }
 
 $conn->close();

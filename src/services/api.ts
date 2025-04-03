@@ -32,13 +32,32 @@ async function fetchFromAPI(endpoint: string, options: RequestInit = {}) {
 export const productsAPI = {
   // Get all products
   getAll: async () => {
-    return fetchFromAPI('products.php');
+    const products = await fetchFromAPI('products.php');
+    return products.map((product: any) => ({
+      ...product,
+      price: parseFloat(product.price),
+      sale_price: product.sale_price ? parseFloat(product.sale_price) : null,
+      rating: parseFloat(product.rating),
+      reviews: parseInt(product.reviews),
+      is_new: Boolean(product.is_new),
+      properties: typeof product.properties === 'string' ? JSON.parse(product.properties) : product.properties
+    }));
   },
   
   // Get featured products
   getFeatured: async () => {
     const products = await fetchFromAPI('products.php');
-    return products.filter((product: any) => product.is_featured);
+    return products
+      .filter((product: any) => product.is_featured)
+      .map((product: any) => ({
+        ...product,
+        price: parseFloat(product.price),
+        sale_price: product.sale_price ? parseFloat(product.sale_price) : null,
+        rating: parseFloat(product.rating),
+        reviews: parseInt(product.reviews),
+        is_new: Boolean(product.is_new),
+        properties: typeof product.properties === 'string' ? JSON.parse(product.properties) : product.properties
+      }));
   },
   
   // Add a new product

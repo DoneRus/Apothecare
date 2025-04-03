@@ -1,17 +1,6 @@
 <?php
-// Allow cross-origin requests from your frontend
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-
-// Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header("HTTP/1.1 200 OK");
-    exit;
-}
-
-include_once 'db_connect.php';
+require_once 'cors.php';
+require_once 'db_connect.php';
 
 // Simple session management
 session_start();

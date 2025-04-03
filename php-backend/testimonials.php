@@ -1,4 +1,7 @@
 <?php
+require_once 'cors.php';
+require_once 'db_connect.php';
+
 // Allow cross-origin requests from your frontend
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -10,8 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     header("HTTP/1.1 200 OK");
     exit;
 }
-
-include_once 'db_connect.php';
 
 // Handle GET request to fetch testimonials
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
