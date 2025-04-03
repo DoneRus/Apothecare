@@ -16,10 +16,37 @@ export default function Chatbot() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('/api/chatbot', { message: input });
-      setMessages((prev) => [...prev, { text: response.data.reply, sender: 'bot' }]);
+      console.log('Sending message to API:', input);
+      const response = await axios.post(`${window.location.origin}/api/chatbot`, { message: input });
+      console.log('API response:', response.data);
+      
+      if (response.data.error) {
+        setMessages((prev) => [...prev, { 
+          text: `Error: ${response.data.error}`, 
+          sender: 'bot' 
+        }]);
+      } else {
+        setMessages((prev) => [...prev, { 
+          text: response.data.reply, 
+          sender: 'bot' 
+        }]);
+      }
     } catch (error) {
-      setMessages((prev) => [...prev, { text: "Sorry, I couldn't connect to the server.", sender: 'bot' }]);
+      console.error('Error communicating with chatbot API:', error);
+      
+      let errorMessage = "Sorry, I couldn't connect to the server.";
+      
+      if (axios.isAxiosError(error) && error.response) {
+        console.error('Response error data:', error.response.data);
+        
+        if (error.response.data && error.response.data.reply) {
+          errorMessage = error.response.data.reply;
+        } else {
+          errorMessage = `Server error (${error.response.status}): Please try again later.`;
+        }
+      }
+      
+      setMessages((prev) => [...prev, { text: errorMessage, sender: 'bot' }]);
     } finally {
       setIsLoading(false);
     }
