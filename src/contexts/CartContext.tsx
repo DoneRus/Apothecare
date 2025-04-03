@@ -1,219 +1,139 @@
 'use client';
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product } from '../data/products';
 import { cartAPI } from '../services/api';
 
-type CartItem = {
-  id?: number;  // Cart item ID from backend
+interface CartItem {
+  id?: number;
   product: Product;
   quantity: number;
-};
+}
 
-export type CartContextType = {
+interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product, quantity: number) => Promise<void>;
-  removeItem: (productId: number) => Promise<void>;
-  updateQuantity: (productId: number, quantity: number) => Promise<void>;
-  clearCart: () => Promise<void>;
   loading: boolean;
   error: string | null;
-  itemCount: number;
+  addItem: (product: Product, quantity: number) => Promise<void>;
+  removeItem: (id: number) => Promise<void>;
+  updateQuantity: (id: number, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
   totalPrice: number;
-};
+  itemCount: number;
+}
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Calculate derived values
-  const itemCount = items.reduce((count, item) => count + item.quantity, 0);
-  const totalPrice = items.reduce(
-    (total, item) => total + (item.product.price * item.quantity), 
-    0
-  );
-
-  // Fetch cart items on component mount
   useEffect(() => {
-    const fetchCartItems = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const cartItems = await cartAPI.getItems();
-        
-        // Transform API response to match our CartItem structure
-        const transformedItems = cartItems.map((item: any) => ({
-          id: item.id,
-          product: {
-            id: item.product_id,
-            name: item.name,
-            category: item.category,
-            description: item.description,
-            price: parseFloat(item.price),
-            rating: parseFloat(item.rating),
-            reviews: item.reviews,
-            properties: item.properties ? JSON.parse(item.properties) : {},
-            is_new: Boolean(item.is_new),
-          },
-          quantity: item.quantity
-        }));
-        
-        setItems(transformedItems);
-      } catch (err: any) {
-        console.error('Error fetching cart:', err);
-        setError('Failed to load cart items');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCartItems();
+    fetchCart();
   }, []);
 
-  // Add item to cart
+  const fetchCart = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const cartItems = await cartAPI.getItems();
+      setItems(cartItems);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load cart');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const addItem = async (product: Product, quantity: number) => {
-    setLoading(true);
-    setError(null);
-    
     try {
-      await cartAPI.addItem(product.id, quantity);
-      
-      // Refetch cart after adding item
-      const cartItems = await cartAPI.getItems();
-      
-      // Transform API response
-      const transformedItems = cartItems.map((item: any) => ({
-        id: item.id,
-        product: {
-          id: item.product_id,
-          name: item.name,
-          category: item.category,
-          description: item.description,
-          price: parseFloat(item.price),
-          rating: parseFloat(item.rating),
-          reviews: item.reviews,
-          properties: item.properties ? JSON.parse(item.properties) : {},
-          is_new: Boolean(item.is_new),
-        },
-        quantity: item.quantity
-      }));
-      
-      setItems(transformedItems);
-    } catch (err: any) {
-      console.error('Error adding item to cart:', err);
-      setError('Failed to add item to cart');
+      setLoading(true);
+      setError(null);
+      const newItem = await cartAPI.addItem(product.id, quantity);
+      setItems(prev => [...prev, newItem]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add item to cart');
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Remove item from cart
-  const removeItem = async (cartItemId: number) => {
-    setLoading(true);
-    setError(null);
-    
+  const removeItem = async (id: number) => {
     try {
-      await cartAPI.removeItem(cartItemId);
-      setItems(items.filter(item => item.id !== cartItemId));
-    } catch (err: any) {
-      console.error('Error removing item from cart:', err);
-      setError('Failed to remove item from cart');
+      setLoading(true);
+      setError(null);
+      await cartAPI.removeItem(id);
+      setItems(prev => prev.filter(item => item.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to remove item from cart');
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Update item quantity
-  const updateQuantity = async (cartItemId: number, quantity: number) => {
-    // Find the item
-    const item = items.find(item => item.id === cartItemId);
-    if (!item) return;
-    
-    if (quantity <= 0) {
-      // Remove item if quantity is 0 or negative
-      await removeItem(cartItemId);
-      return;
-    }
-    
-    setLoading(true);
-    setError(null);
+  const updateQuantity = async (id: number, quantity: number) => {
+    if (quantity < 1) return;
     
     try {
-      // Remove and re-add with new quantity (since our API doesn't have a direct update endpoint)
-      await cartAPI.removeItem(cartItemId);
-      await cartAPI.addItem(item.product.id, quantity);
-      
-      // Refetch cart after update
-      const cartItems = await cartAPI.getItems();
-      
-      // Transform API response
-      const transformedItems = cartItems.map((item: any) => ({
-        id: item.id,
-        product: {
-          id: item.product_id,
-          name: item.name,
-          category: item.category,
-          description: item.description,
-          price: parseFloat(item.price),
-          rating: parseFloat(item.rating),
-          reviews: item.reviews,
-          properties: item.properties ? JSON.parse(item.properties) : {},
-          is_new: Boolean(item.is_new),
-        },
-        quantity: item.quantity
-      }));
-      
-      setItems(transformedItems);
-    } catch (err: any) {
-      console.error('Error updating cart item:', err);
-      setError('Failed to update cart item');
+      setLoading(true);
+      setError(null);
+      await cartAPI.updateQuantity(id, quantity);
+      setItems(prev => prev.map(item => 
+        item.id === id ? { ...item, quantity } : item
+      ));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update quantity');
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  // Clear cart
   const clearCart = async () => {
-    setLoading(true);
-    setError(null);
-    
     try {
+      setLoading(true);
+      setError(null);
       await cartAPI.clearCart();
       setItems([]);
-    } catch (err: any) {
-      console.error('Error clearing cart:', err);
-      setError('Failed to clear cart');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to clear cart');
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
+  const totalPrice = items.reduce((total, item) => {
+    const price = item.product.sale_price || item.product.price;
+    return total + (price * item.quantity);
+  }, 0);
+
+  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        addItem,
-        removeItem,
-        updateQuantity,
-        clearCart,
-        loading,
-        error,
-        itemCount,
-        totalPrice
-      }}
-    >
+    <CartContext.Provider value={{
+      items,
+      loading,
+      error,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      totalPrice,
+      itemCount
+    }}>
       {children}
     </CartContext.Provider>
   );
 }
 
-export const useCart = () => {
+export function useCart() {
   const context = useContext(CartContext);
   if (context === undefined) {
     throw new Error('useCart must be used within a CartProvider');
   }
   return context;
-}; 
+} 

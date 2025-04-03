@@ -1,195 +1,129 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
+import { productsAPI } from '@/services/api';
+import { ImageUploader } from '@/components/admin/ImageUploader';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { useState } from 'react';
 
-export default function AdminDashboard() {
-  // State for interactive elements
-  const [dateRange, setDateRange] = useState('today');
+interface Product {
+    id: number;
+    name: string;
+    category: string;
+    description: string;
+    price: number;
+    sale_price?: number;
+    rating: number;
+    reviews: number;
+    properties: Record<string, any>;
+    is_new: boolean;
+    is_featured: boolean;
+    image_url?: string;
+}
 
-  // This would be fetched from an API in a real application
-  const salesData = {
-    today: { orders: '1,284', revenue: '$42,389', products: '584', customers: '3,942' },
-    week: { orders: '5,367', revenue: '$168,945', products: '612', customers: '4,281' },
-    month: { orders: '18,902', revenue: '$531,478', products: '643', customers: '5,164' },
-    year: { orders: '156,729', revenue: '$4,218,397', products: '721', customers: '8,376' }
-  };
+export default function AdminPage() {
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-  const data = salesData[dateRange as keyof typeof salesData];
+    useEffect(() => {
+        loadProducts();
+    }, []);
 
-  return (
-    <AdminLayout 
-      title="Dashboard" 
-      subtitle="Welcome to the ApotheCare admin panel"
-    >
-      {/* Date Range Selector */}
-      <div className="mb-6 flex justify-end">
-        <div className="inline-flex bg-white rounded-md shadow-sm">
-          <button 
-            onClick={() => setDateRange('today')} 
-            className={`px-4 py-2 text-sm font-medium ${dateRange === 'today' ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-50'} rounded-l-md`}
-          >
-            Today
-          </button>
-          <button 
-            onClick={() => setDateRange('week')} 
-            className={`px-4 py-2 text-sm font-medium ${dateRange === 'week' ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-50'} border-l border-gray-200`}
-          >
-            This Week
-          </button>
-          <button 
-            onClick={() => setDateRange('month')} 
-            className={`px-4 py-2 text-sm font-medium ${dateRange === 'month' ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-50'} border-l border-gray-200`}
-          >
-            This Month
-          </button>
-          <button 
-            onClick={() => setDateRange('year')} 
-            className={`px-4 py-2 text-sm font-medium ${dateRange === 'year' ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-50'} border-l border-gray-200 rounded-r-md`}
-          >
-            This Year
-          </button>
-        </div>
-      </div>
+    const loadProducts = async () => {
+        try {
+            const data = await productsAPI.getAll();
+            setProducts(data);
+            setError(null);
+        } catch (err) {
+            setError('Failed to load products');
+            console.error('Error loading products:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard 
-          title="Total Orders" 
-          value={data.orders} 
-          change="+12.5%" 
-          trend="up" 
-          icon="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-        />
-        <StatCard 
-          title="Revenue" 
-          value={data.revenue} 
-          change="+8.2%" 
-          trend="up" 
-          icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-        <StatCard 
-          title="Products" 
-          value={data.products} 
-          change="+3.1%" 
-          trend="up" 
-          icon="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-        />
-        <StatCard 
-          title="Customers" 
-          value={data.customers} 
-          change="+5.4%" 
-          trend="up" 
-          icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-        />
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Orders */}
-        <div className="lg:col-span-2 bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="text-lg font-medium text-gray-800">Recent Orders</h3>
-            <button 
-              onClick={() => window.location.href = '/admin/orders'} 
-              className="text-primary hover:text-primary-dark text-sm font-medium"
-            >
-              View All
-            </button>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Order ID
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Amount
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {recentOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => alert(`View details for order #${order.id}`)}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">
-                      #{order.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {order.customer}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      ${order.amount}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        statusColors[order.status]
-                      }`}>
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                      {order.date}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        {/* Customer Activity */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-800">Recent Activity</h3>
-          </div>
-          
-          <div className="p-6">
-            <div className="flow-root">
-              <ul className="-mb-8">
-                {activities.map((activity, index) => (
-                  <li key={index}>
-                    <div className="relative pb-8">
-                      {index !== activities.length - 1 ? (
-                        <span className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-                      ) : null}
-                      <div className="relative flex space-x-3">
-                        <div>
-                          <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
-                            activityTypeColors[activity.type]
-                          }`}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={activityIcons[activity.type]} />
-                            </svg>
-                          </span>
+    const handleImageUploadSuccess = (productId: number, imageUrl: string) => {
+        setProducts(prevProducts =>
+            prevProducts.map(product =>
+                product.id === productId
+                    ? { ...product, image_url: imageUrl }
+                    : product
+            )
+        );
+    };
+
+    const handleImageUploadError = (error: Error) => {
+        setError(`Failed to upload image: ${error.message}`);
+    };
+
+    if (loading) {
+        return <div className="p-4">Loading products...</div>;
+    }
+
+    if (error) {
+        return <div className="p-4 text-red-500">{error}</div>;
+    }
+
+    return (
+        <AdminLayout 
+            title="Product Management" 
+            subtitle="Welcome to the ApotheCare admin panel"
+        >
+            <div className="container mx-auto p-4">
+                <h1 className="text-2xl font-bold mb-6">Product Management</h1>
+                <div className="grid gap-6">
+                    {products.map(product => (
+                        <div key={product.id} className="border rounded-lg p-4">
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <h2 className="text-xl font-semibold">{product.name}</h2>
+                                    <p className="text-gray-600">{product.category}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-semibold">€{product.price.toFixed(2)}</p>
+                                    {product.sale_price && (
+                                        <p className="text-red-500">Sale: €{product.sale_price.toFixed(2)}</p>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-gray-700">{product.description}</p>
+                                    <div className="mt-2">
+                                        <span className="text-sm text-gray-600">
+                                            Rating: {product.rating} ({product.reviews} reviews)
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    {product.image_url ? (
+                                        <div className="relative aspect-square w-full">
+                                            <img
+                                                src={product.image_url}
+                                                alt={product.name}
+                                                className="object-cover rounded-lg"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="bg-gray-100 aspect-square w-full rounded-lg flex items-center justify-center">
+                                            <span className="text-gray-400">No image</span>
+                                        </div>
+                                    )}
+                                    <div className="mt-4">
+                                        <ImageUploader
+                                            productId={product.id}
+                                            onSuccess={(imageUrl) => handleImageUploadSuccess(product.id, imageUrl)}
+                                            onError={handleImageUploadError}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex-1 min-w-0 pt-1.5">
-                          <p className="text-sm text-gray-500">
-                            <span className="font-medium text-gray-900">{activity.user}</span>
-                            {' '}{activity.action}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                    ))}
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </AdminLayout>
-  );
+        </AdminLayout>
+    );
 }
 
 // Components and sample data

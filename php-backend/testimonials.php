@@ -1,71 +1,75 @@
 <?php
 require_once 'cors.php';
-require_once 'db_connect.php';
+require_once 'db.php';
 
-// Allow cross-origin requests from your frontend
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+try {
+    switch ($_SERVER['REQUEST_METHOD']) {
+        case 'GET':
+            // Get all testimonials
+            $stmt = $pdo->prepare("
+                SELECT * FROM testimonials 
+                ORDER BY created_at DESC
+            ");
+            $stmt->execute();
+            $testimonials = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            echo json_encode($testimonials);
+            break;
 
-// Handle preflight OPTIONS request
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    header("HTTP/1.1 200 OK");
-    exit;
+        case 'POST':
+            // Get the posted data
+            $data = json_decode(file_get_contents("php://input"));
+            
+            // Validate required fields
+            if (!isset($data->name) || !isset($data->content) || !isset($data->rating)) {
+                http_response_code(400);
+                echo json_encode([
+                    'error' => 'Name, content, and rating are required'
+                ]);
+                exit;
+            }
+            
+            // Validate rating (1-5)
+            if ($data->rating < 1 || $data->rating > 5) {
+                http_response_code(400);
+                echo json_encode([
+                    'error' => 'Rating must be between 1 and 5'
+                ]);
+                exit;
+            }
+            
+            // Prepare and execute the insert statement
+            $stmt = $pdo->prepare("
+                INSERT INTO testimonials (name, role, content, rating) 
+                VALUES (:name, :role, :content, :rating)
+            ");
+            
+            $stmt->execute([
+                ':name' => $data->name,
+                ':role' => $data->role ?? '',
+                ':content' => $data->content,
+                ':rating' => $data->rating
+            ]);
+            
+            $testimonial_id = $pdo->lastInsertId();
+            
+            echo json_encode([
+                'message' => 'Testimonial added successfully',
+                'id' => $testimonial_id
+            ]);
+            break;
+
+        default:
+            http_response_code(405);
+            echo json_encode([
+                'error' => 'Method not allowed'
+            ]);
+            break;
+    }
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode([
+        'error' => 'Database error: ' . $e->getMessage()
+    ]);
 }
-
-// Handle GET request to fetch testimonials
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $sql = "SELECT * FROM testimonials";
-    $result = $conn->query($sql);
-    
-    if ($result) {
-        $testimonials = array();
-        while($row = $result->fetch_assoc()) {
-            $testimonials[] = $row;
-        }
-        
-        echo json_encode($testimonials);
-    } else {
-        echo json_encode(["error" => "Failed to fetch testimonials: " . $conn->error]);
-    }
-}
-
-// Handle POST request to add testimonial
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get the posted data
-    $data = json_decode(file_get_contents("php://input"));
-    
-    // Validate required fields
-    if (!isset($data->name) || !isset($data->content) || !isset($data->rating)) {
-        echo json_encode(["error" => "Name, content, and rating are required"]);
-        exit;
-    }
-    
-    $name = $conn->real_escape_string($data->name);
-    $role = $conn->real_escape_string($data->role ?? '');
-    $content = $conn->real_escape_string($data->content);
-    $rating = intval($data->rating);
-    
-    // Validate rating (1-5)
-    if ($rating < 1 || $rating > 5) {
-        echo json_encode(["error" => "Rating must be between 1 and 5"]);
-        exit;
-    }
-    
-    $sql = "INSERT INTO testimonials (name, role, content, rating) 
-            VALUES ('$name', '$role', '$content', $rating)";
-    
-    if ($conn->query($sql) === TRUE) {
-        $testimonial_id = $conn->insert_id;
-        echo json_encode([
-            "message" => "Testimonial added successfully",
-            "id" => $testimonial_id
-        ]);
-    } else {
-        echo json_encode(["error" => "Failed to add testimonial: " . $conn->error]);
-    }
-}
-
-$conn->close();
 ?> 
