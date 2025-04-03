@@ -37,6 +37,16 @@ module.exports = {
     {
       pattern: /border-(amber|red|green|blue|purple|teal|sky|gray|yellow|orange|rose)-(500|600)/,
     },
+    // Additional patterns for testimonials and customer section
+    {
+      pattern: /bg-(primary|blue|green|purple|amber)-(DEFAULT|500)/,
+    },
+    'bg-primary',
+    'from-primary/10',
+    'to-primary/20',
+    '-space-x-2',
   ],
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/line-clamp'),
+  ],
 }; 

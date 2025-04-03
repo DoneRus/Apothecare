@@ -3,9 +3,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ScrollButton } from '../../components/ui/ScrollButton';
 import { ExpandableProductsSection } from '../../components/ui/ExpandableProductsSection';
-import { featuredProducts, allProducts } from '../../data/products';
 import { HeaderNavigation } from '../../components/ui/HeaderNavigation';
 import { HeaderCartButton } from '../../components/ui/HeaderCartButton';
+import { TestimonialsSection } from '../../components/ui/TestimonialsSection';
 
 export const metadata: Metadata = {
   title: 'Dashboard | ApotheCare',
@@ -156,94 +156,11 @@ export default function DashboardPage() {
 
         {/* Featured Products */}
         <section id="products" className="py-16 bg-gray-50">
-          <ExpandableProductsSection featuredProducts={featuredProducts} allProducts={allProducts} />
+          <ExpandableProductsSection />
         </section>
 
         {/* Testimonials Section */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-800">What Our Customers <span className="text-primary">Say</span></h2>
-              <p className="text-gray-600 mt-3 max-w-2xl mx-auto">
-                Thousands of people trust ApotheCare for their healthcare needs. Read what they have to say about our service.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Testimonial 1 */}
-              <div className="bg-gray-50 rounded-xl p-6 relative">
-                <div className="absolute -top-4 left-6 bg-primary text-white p-2 rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-6 h-6">
-                    <path d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.25a.75.75 0 001 .707A8.237 8.237 0 016 18.75c1.995 0 3.823.707 5.25 1.886V4.533zM12.75 20.636A8.214 8.214 0 0118 18.75c.966 0 1.89.166 2.75.47a.75.75 0 001-.708V4.262a.75.75 0 00-.5-.707A9.735 9.735 0 0018 3a9.707 9.707 0 00-5.25 1.533v16.103z" />
-                  </svg>
-                </div>
-                <div className="flex items-center gap-1 mb-4 pt-3">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-600 italic mb-6">"I've been using ApotheCare for over a year now, and it has completely changed how I manage my medications. The automatic refills and reminders ensure I never miss a dose."</p>
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
-                  <div>
-                    <h4 className="font-medium text-gray-800">Emma Thompson</h4>
-                    <p className="text-gray-500 text-sm">Loyal Customer</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Testimonial 2 */}
-              <div className="bg-gray-50 rounded-xl p-6 relative">
-                <div className="absolute -top-4 left-6 bg-primary text-white p-2 rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-6 h-6">
-                    <path d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.25a.75.75 0 001 .707A8.237 8.237 0 016 18.75c1.995 0 3.823.707 5.25 1.886V4.533zM12.75 20.636A8.214 8.214 0 0118 18.75c.966 0 1.89.166 2.75.47a.75.75 0 001-.708V4.262a.75.75 0 00-.5-.707A9.735 9.735 0 0018 3a9.707 9.707 0 00-5.25 1.533v16.103z" />
-                  </svg>
-                </div>
-                <div className="flex items-center gap-1 mb-4 pt-3">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-600 italic mb-6">"The pharmacist consultation feature is incredible. I had questions about potential drug interactions, and received professional advice within minutes. Very impressed!"</p>
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
-                  <div>
-                    <h4 className="font-medium text-gray-800">Marcus Johnson</h4>
-                    <p className="text-gray-500 text-sm">New Customer</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Testimonial 3 */}
-              <div className="bg-gray-50 rounded-xl p-6 relative">
-                <div className="absolute -top-4 left-6 bg-primary text-white p-2 rounded-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-6 h-6">
-                    <path d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.25a.75.75 0 001 .707A8.237 8.237 0 016 18.75c1.995 0 3.823.707 5.25 1.886V4.533zM12.75 20.636A8.214 8.214 0 0118 18.75c.966 0 1.89.166 2.75.47a.75.75 0 001-.708V4.262a.75.75 0 00-.5-.707A9.735 9.735 0 0018 3a9.707 9.707 0 00-5.25 1.533v16.103z" />
-                  </svg>
-                </div>
-                <div className="flex items-center gap-1 mb-4 pt-3">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-yellow-400">
-                      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-gray-600 italic mb-6">"ApotheCare delivers my monthly prescriptions right to my door, saving me time and stress. The app makes it easy to track everything, and their customer service is excellent."</p>
-                <div className="flex items-center">
-                  <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
-                  <div>
-                    <h4 className="font-medium text-gray-800">Sophia Patel</h4>
-                    <p className="text-gray-500 text-sm">Satisfied Customer</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <TestimonialsSection />
 
         {/* Orders Section (Empty placeholder) */}
         <section id="orders" className="py-16 bg-gray-50">
@@ -435,4 +352,4 @@ export default function DashboardPage() {
       </footer>
     </div>
   );
-} 
+}
