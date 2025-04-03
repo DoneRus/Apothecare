@@ -1,21 +1,20 @@
 'use client';
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import { Product } from '../data/products';
-import { cartAPI } from '../services/api';
 
 type CartItem = {
-  id?: number;  // Cart item ID from backend
+  id: number;  // Cart item ID
   product: Product;
   quantity: number;
 };
 
 export type CartContextType = {
   items: CartItem[];
-  addItem: (product: Product, quantity: number) => Promise<void>;
-  removeItem: (productId: number) => Promise<void>;
-  updateQuantity: (productId: number, quantity: number) => Promise<void>;
-  clearCart: () => Promise<void>;
+  addItem: (product: Product, quantity: number) => void;
+  removeItem: (cartItemId: number) => void;
+  updateQuantity: (cartItemId: number, quantity: number) => void;
+  clearCart: () => void;
   loading: boolean;
   error: string | null;
   itemCount: number;
@@ -24,6 +23,7 @@ export type CartContextType = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// Mock implementation for development
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -36,72 +36,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     0
   );
 
-  // Fetch cart items on component mount
-  useEffect(() => {
-    const fetchCartItems = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const cartItems = await cartAPI.getItems();
-        
-        // Transform API response to match our CartItem structure
-        const transformedItems = cartItems.map((item: any) => ({
-          id: item.id,
-          product: {
-            id: item.product_id,
-            name: item.name,
-            category: item.category,
-            description: item.description,
-            price: parseFloat(item.price),
-            rating: parseFloat(item.rating),
-            reviews: item.reviews,
-            properties: item.properties ? JSON.parse(item.properties) : {},
-            is_new: Boolean(item.is_new),
-          },
-          quantity: item.quantity
-        }));
-        
-        setItems(transformedItems);
-      } catch (err: any) {
-        console.error('Error fetching cart:', err);
-        setError('Failed to load cart items');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCartItems();
-  }, []);
-
   // Add item to cart
-  const addItem = async (product: Product, quantity: number) => {
+  const addItem = (product: Product, quantity: number) => {
     setLoading(true);
-    setError(null);
-    
     try {
-      await cartAPI.addItem(product.id, quantity);
+      const existingItemIndex = items.findIndex(item => item.product.id === product.id);
       
-      // Refetch cart after adding item
-      const cartItems = await cartAPI.getItems();
-      
-      // Transform API response
-      const transformedItems = cartItems.map((item: any) => ({
-        id: item.id,
-        product: {
-          id: item.product_id,
-          name: item.name,
-          category: item.category,
-          description: item.description,
-          price: parseFloat(item.price),
-          rating: parseFloat(item.rating),
-          reviews: item.reviews,
-          properties: item.properties ? JSON.parse(item.properties) : {},
-          is_new: Boolean(item.is_new),
-        },
-        quantity: item.quantity
-      }));
-      
-      setItems(transformedItems);
+      if (existingItemIndex >= 0) {
+        // Update quantity of existing item
+        const updatedItems = [...items];
+        updatedItems[existingItemIndex].quantity += quantity;
+        setItems(updatedItems);
+      } else {
+        // Add new item
+        const newItem: CartItem = {
+          id: Date.now(), // Use timestamp as temporary ID
+          product,
+          quantity
+        };
+        setItems([...items, newItem]);
+      }
     } catch (err: any) {
       console.error('Error adding item to cart:', err);
       setError('Failed to add item to cart');
@@ -111,12 +65,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Remove item from cart
-  const removeItem = async (cartItemId: number) => {
+  const removeItem = (cartItemId: number) => {
     setLoading(true);
-    setError(null);
-    
     try {
-      await cartAPI.removeItem(cartItemId);
       setItems(items.filter(item => item.id !== cartItemId));
     } catch (err: any) {
       console.error('Error removing item from cart:', err);
@@ -127,46 +78,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Update item quantity
-  const updateQuantity = async (cartItemId: number, quantity: number) => {
-    // Find the item
-    const item = items.find(item => item.id === cartItemId);
-    if (!item) return;
-    
-    if (quantity <= 0) {
-      // Remove item if quantity is 0 or negative
-      await removeItem(cartItemId);
-      return;
-    }
-    
+  const updateQuantity = (cartItemId: number, quantity: number) => {
     setLoading(true);
-    setError(null);
-    
     try {
-      // Remove and re-add with new quantity (since our API doesn't have a direct update endpoint)
-      await cartAPI.removeItem(cartItemId);
-      await cartAPI.addItem(item.product.id, quantity);
+      if (quantity <= 0) {
+        // Remove item if quantity is 0 or negative
+        removeItem(cartItemId);
+        return;
+      }
       
-      // Refetch cart after update
-      const cartItems = await cartAPI.getItems();
-      
-      // Transform API response
-      const transformedItems = cartItems.map((item: any) => ({
-        id: item.id,
-        product: {
-          id: item.product_id,
-          name: item.name,
-          category: item.category,
-          description: item.description,
-          price: parseFloat(item.price),
-          rating: parseFloat(item.rating),
-          reviews: item.reviews,
-          properties: item.properties ? JSON.parse(item.properties) : {},
-          is_new: Boolean(item.is_new),
-        },
-        quantity: item.quantity
-      }));
-      
-      setItems(transformedItems);
+      const updatedItems = items.map(item => 
+        item.id === cartItemId ? { ...item, quantity } : item
+      );
+      setItems(updatedItems);
     } catch (err: any) {
       console.error('Error updating cart item:', err);
       setError('Failed to update cart item');
@@ -176,12 +100,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Clear cart
-  const clearCart = async () => {
+  const clearCart = () => {
     setLoading(true);
-    setError(null);
-    
     try {
-      await cartAPI.clearCart();
       setItems([]);
     } catch (err: any) {
       console.error('Error clearing cart:', err);
