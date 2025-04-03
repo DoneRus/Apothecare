@@ -7,9 +7,9 @@ type CartItem = {
   id: number;  // Cart item ID
   product: Product;
   quantity: number;
-};
+}
 
-export type CartContextType = {
+interface CartContextType {
   items: CartItem[];
   addItem: (product: Product, quantity: number) => void;
   removeItem: (cartItemId: number) => void;
@@ -19,14 +19,15 @@ export type CartContextType = {
   error: string | null;
   itemCount: number;
   totalPrice: number;
-};
+  itemCount: number;
+}
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 // Mock implementation for development
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Calculate derived values
@@ -104,37 +105,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       setItems([]);
-    } catch (err: any) {
-      console.error('Error clearing cart:', err);
-      setError('Failed to clear cart');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to clear cart');
+      throw err;
     } finally {
       setLoading(false);
     }
   };
 
+  const totalPrice = items.reduce((total, item) => {
+    const price = item.product.sale_price || item.product.price;
+    return total + (price * item.quantity);
+  }, 0);
+
+  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
+
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        addItem,
-        removeItem,
-        updateQuantity,
-        clearCart,
-        loading,
-        error,
-        itemCount,
-        totalPrice
-      }}
-    >
+    <CartContext.Provider value={{
+      items,
+      loading,
+      error,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart,
+      totalPrice,
+      itemCount
+    }}>
       {children}
     </CartContext.Provider>
   );
 }
 
-export const useCart = () => {
+export function useCart() {
   const context = useContext(CartContext);
   if (context === undefined) {
     throw new Error('useCart must be used within a CartProvider');
   }
   return context;
-}; 
+} 

@@ -72,11 +72,13 @@ export function ExpandableProductsSection({
   };
 
   const getColorClasses = (product: Product) => {
+    const isOnSale = !!product.sale_price;
+    
     return {
-      bgClass: 'bg-white',
-      textClass: 'text-gray-900',
-      buttonClass: 'bg-blue-600 text-white',
-      hoverClass: 'hover:bg-blue-700'
+      bgClass: isOnSale ? 'bg-red-50' : 'bg-gray-50',
+      textClass: isOnSale ? 'text-red-600' : 'text-gray-900',
+      buttonClass: 'bg-[#10B981] text-white',
+      hoverClass: 'hover:bg-[#059669]'
     };
   };
 

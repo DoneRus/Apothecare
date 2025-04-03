@@ -1,39 +1,49 @@
+'use client';
+
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'outline' | 'destructive' | 'ghost';
-  size?: 'default' | 'sm' | 'lg';
-  children: React.ReactNode;
+    variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+    size?: 'sm' | 'md' | 'lg';
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  variant = 'default',
-  size = 'default',
-  className = '',
-  children,
-  ...props
+    className,
+    variant = 'primary',
+    size = 'md',
+    disabled,
+    children,
+    ...props
 }) => {
-  const variantClasses = {
-    default: 'bg-primary text-white hover:bg-primary-dark',
-    outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100',
-    destructive: 'bg-red-600 text-white hover:bg-red-700',
-    ghost: 'bg-transparent hover:bg-gray-100'
-  };
+    const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+    
+    const variants = {
+        primary: 'bg-[#10B981] hover:bg-[#059669] text-white',
+        secondary: 'bg-[#E5E7EB] text-gray-700 hover:bg-gray-200',
+        outline: 'border border-gray-200 bg-white hover:bg-gray-50 text-gray-700',
+        ghost: 'text-gray-600 hover:bg-gray-100 hover:text-[#10B981]',
+        danger: 'bg-red-600 text-white hover:bg-red-700'
+    };
 
-  const sizeClasses = {
-    default: 'px-4 py-2',
-    sm: 'px-3 py-1 text-sm',
-    lg: 'px-6 py-3 text-lg'
-  };
+    const sizes = {
+        sm: 'h-9 px-3 text-sm',
+        md: 'h-10 px-4 py-2',
+        lg: 'h-11 px-8'
+    };
 
-  const baseClasses = 'rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 transition-colors';
-  
-  return (
-    <button 
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
-      {...props}
-    >
-      {children}
-    </button>
-  );
+    return (
+        <button
+            className={cn(
+                baseStyles,
+                variants[variant],
+                sizes[size],
+                className
+            )}
+            disabled={disabled}
+            {...props}
+        >
+            {children}
+        </button>
+    );
 }; 
