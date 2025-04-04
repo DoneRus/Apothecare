@@ -13,23 +13,23 @@ try {
     $pdo = new PDO("mysql:host=$host", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Create database
-    $sql = "CREATE DATABASE IF NOT EXISTS apothecare";
+// Create database
+    $sql = "CREATE DATABASE IF NOT EXISTS apothecare_db";
     $pdo->exec($sql);
     echo "Database created successfully<br>";
 
     // Use the database
-    $pdo->exec("USE apothecare");
+    $pdo->exec("USE apothecare_db");
 
-    // Create testimonials table
-    $sql = "CREATE TABLE IF NOT EXISTS testimonials (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(255) NOT NULL,
-        role VARCHAR(100),
-        content TEXT NOT NULL,
-        rating INT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )";
+// Create testimonials table
+$sql = "CREATE TABLE IF NOT EXISTS testimonials (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    role VARCHAR(100),
+    content TEXT NOT NULL,
+    rating INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)";
     $pdo->exec($sql);
     echo "Testimonials table created successfully<br>";
 
@@ -53,13 +53,13 @@ try {
     $pdo->exec($sql);
     echo "Products table created successfully<br>";
 
-    // Create cart table
-    $sql = "CREATE TABLE IF NOT EXISTS cart (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        session_id VARCHAR(255) NOT NULL,
+// Create cart table
+$sql = "CREATE TABLE IF NOT EXISTS cart (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    session_id VARCHAR(255) NOT NULL,
         product_id INT NOT NULL,
         quantity INT NOT NULL DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
         INDEX idx_session_id (session_id)
@@ -92,8 +92,11 @@ try {
         echo "Sample testimonials inserted successfully<br>";
     }
 
-    echo "<br>Setup completed successfully!";
+    // Return JSON response
+    http_response_code(200);
+    echo json_encode(["message" => "Setup completed successfully!"]);
 } catch(PDOException $e) {
-    die("Setup failed: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(["error" => "Setup failed: " . $e->getMessage()]);
 }
 ?> 
