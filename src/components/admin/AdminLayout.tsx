@@ -3,7 +3,6 @@
 import { ReactNode, useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useNotifications } from '@/contexts/NotificationContext';
 
 type AdminLayoutProps = {
   children: ReactNode;
@@ -16,9 +15,6 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const pathname = usePathname();
-  
-  // Use the global notifications context
-  const { notifications } = useNotifications();
 
   const notificationsRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -70,12 +66,15 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
     { name: 'Products', href: '/admin/products', icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
     { name: 'Orders', href: '/admin/orders', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' },
     { name: 'Customers', href: '/admin/customers', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-    { name: 'Notifications', href: '/admin/notifications', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
     { name: 'Settings', href: '/admin/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
   ];
 
-  // Check if there are unread notifications
-  const hasUnreadNotifications = notifications?.some(n => !n.isRead) || false;
+  const notifications = [
+    { id: 1, title: 'New order received', message: 'Order #12350 has been placed', time: '2 minutes ago', isRead: false },
+    { id: 2, title: 'Low stock alert', message: 'Paracetamol 500mg is running low on stock', time: '1 hour ago', isRead: false },
+    { id: 3, title: 'Payment processed', message: 'Payment for order #12348 has been successful', time: '3 hours ago', isRead: true },
+    { id: 4, title: 'New customer registered', message: 'Richard Anderson has created an account', time: '5 hours ago', isRead: true },
+  ];
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -121,7 +120,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                 </svg>
-                {hasUnreadNotifications && (
+                {notifications.some(n => !n.isRead) && (
                   <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
                 )}
               </button>
@@ -133,7 +132,7 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                     <h3 className="text-sm font-semibold text-gray-800">Notifications</h3>
                   </div>
                   <div className="max-h-72 overflow-y-auto">
-                    {notifications && notifications.length > 0 ? (
+                    {notifications.length > 0 ? (
                       notifications.map((notification) => (
                         <div 
                           key={notification.id} 
@@ -148,9 +147,9 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                       <div className="px-4 py-3 text-sm text-gray-500">No notifications</div>
                     )}
                   </div>
-                  <Link href="/admin/notifications" className="block bg-gray-50 text-center px-4 py-2 text-sm text-primary hover:text-primary-dark">
+                  <a href="#" className="block bg-gray-50 text-center px-4 py-2 text-sm text-primary hover:text-primary-dark">
                     View all notifications
-                  </Link>
+                  </a>
                 </div>
               )}
             </div>
@@ -224,9 +223,6 @@ export default function AdminLayout({ children, title, subtitle }: AdminLayoutPr
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                 </svg>
                 <span>{item.name}</span>
-                {item.name === 'Notifications' && hasUnreadNotifications && (
-                  <span className="ml-auto block h-2 w-2 rounded-full bg-red-500"></span>
-                )}
               </Link>
             ))}
           </nav>

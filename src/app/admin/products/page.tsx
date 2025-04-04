@@ -2,20 +2,6 @@
 
 import AdminLayout from '@/components/admin/AdminLayout';
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-
-// Simple icon components to replace Heroicons
-const FilterIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-  </svg>
-);
-
-const ChevronDownIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-  </svg>
-);
 
 type ProductCategory = 'Prescription' | 'Over-The-Counter' | 'Supplements' | 'Personal Care' | 'All';
 type ProductStatus = 'In Stock' | 'Low Stock' | 'Out of Stock' | 'All';
@@ -51,7 +37,6 @@ export default function ProductsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [activeProductId, setActiveProductId] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Filter products based on search and filters
   const filteredProducts = allProducts.filter(product => {
@@ -62,11 +47,6 @@ export default function ProductsPage() {
     
     return matchesSearch && matchesCategory && matchesStatus;
   });
-
-  // Toggle filter dropdown
-  const toggleFilter = () => {
-    setIsFilterOpen(!isFilterOpen);
-  };
 
   // Handle view product
   const handleViewProduct = (id: string) => {
@@ -123,83 +103,40 @@ export default function ProductsPage() {
         
         <div className="flex space-x-3">
           <div className="relative">
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              onClick={toggleFilter}
-            >
-              <FilterIcon />
-              Filter
-              <ChevronDownIcon />
-            </Button>
-            
-            {isFilterOpen && (
-              <div className="absolute right-0 mt-2 w-72 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                <div className="py-1">
-                  <div className="px-4 py-2">
-                    <p className="text-sm font-medium text-gray-900">Category</p>
-                    <div className="mt-2 space-y-2">
-                      {['Prescription', 'Over-The-Counter', 'Supplements', 'Personal Care', 'All'].map((category) => (
-                        <div key={category} className="flex items-center">
-                          <input
-                            id={`category-${category}`}
-                            name="category"
-                            type="radio"
-                            checked={selectedCategory === category}
-                            onChange={() => setSelectedCategory(category as ProductCategory)}
-                            className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                          />
-                          <label htmlFor={`category-${category}`} className="ml-3 text-sm text-gray-700">
-                            {category}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="px-4 py-2 border-t border-gray-100">
-                    <p className="text-sm font-medium text-gray-900">Status</p>
-                    <div className="mt-2 space-y-2">
-                      {['In Stock', 'Low Stock', 'Out of Stock', 'All'].map((status) => (
-                        <div key={status} className="flex items-center">
-                          <input
-                            id={`status-${status}`}
-                            name="status"
-                            type="radio"
-                            checked={selectedStatus === status}
-                            onChange={() => setSelectedStatus(status as ProductStatus)}
-                            className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                          />
-                          <label htmlFor={`status-${status}`} className="ml-3 text-sm text-gray-700">
-                            {status}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="px-4 py-2 border-t border-gray-100">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mr-2"
-                      onClick={() => {
-                        setSelectedCategory('All');
-                        setSelectedStatus('All');
-                      }}
-                    >
-                      Reset
-                    </Button>
-                    <Button 
-                      size="sm"
-                      onClick={() => setIsFilterOpen(false)}
-                    >
-                      Apply
-                    </Button>
-                  </div>
-                </div>
+            <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              <span>Filter</span>
+            </button>
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden z-10">
+              <div className="p-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select 
+                  className="w-full border border-gray-300 rounded-md py-1 px-2 text-sm text-black" 
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value as ProductCategory)}
+                >
+                  <option value="All">All Categories</option>
+                  <option value="Prescription">Prescription</option>
+                  <option value="Over-The-Counter">Over-The-Counter</option>
+                  <option value="Supplements">Supplements</option>
+                  <option value="Personal Care">Personal Care</option>
+                </select>
+                
+                <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Status</label>
+                <select 
+                  className="w-full border border-gray-300 rounded-md py-1 px-2 text-sm text-black"
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value as ProductStatus)}
+                >
+                  <option value="All">All Statuses</option>
+                  <option value="In Stock">In Stock</option>
+                  <option value="Low Stock">Low Stock</option>
+                  <option value="Out of Stock">Out of Stock</option>
+                </select>
               </div>
-            )}
+            </div>
           </div>
           
           <button 
