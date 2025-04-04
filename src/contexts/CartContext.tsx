@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Product } from '../data/products';
 import { cartAPI } from '../services/api';
 
@@ -27,10 +27,6 @@ type CartItem = {
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product, quantity: number) => void;
-  removeItem: (cartItemId: number) => void;
-  updateQuantity: (cartItemId: number, quantity: number) => void;
-  clearCart: () => void;
   addItem: (product: Product, quantity: number) => void;
   removeItem: (cartItemId: number) => void;
   updateQuantity: (cartItemId: number, quantity: number) => void;
@@ -95,7 +91,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Add item to cart
-  const addItem = (product: Product, quantity: number) => {
+  const addItem = async (product: Product, quantity: number) => {
     setLoading(true);
     setError(null);
     
@@ -132,9 +128,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Remove item from cart
-  const removeItem = (cartItemId: number) => {
+  const removeItem = async (cartItemId: number) => {
     setLoading(true);
+    setError(null);
     try {
+      await cartAPI.removeItem(cartItemId);
       setItems(items.filter(item => item.id !== cartItemId));
     } catch (err: unknown) {
       console.error('Error removing item from cart:', err);
@@ -145,14 +143,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Update item quantity
-  const updateQuantity = (cartItemId: number, quantity: number) => {
+  const updateQuantity = async (cartItemId: number, quantity: number) => {
     setLoading(true);
     setError(null);
     
     try {
-      // Remove and re-add with new quantity (since our API doesn't have a direct update endpoint)
+      // Find the item first
+      const itemToUpdate = items.find(item => item.id === cartItemId);
+      
+      if (!itemToUpdate) {
+        throw new Error('Item not found in cart');
+      }
+      
+      // Remove and re-add with new quantity
       await cartAPI.removeItem(cartItemId);
-      await cartAPI.addItem(item.product.id, quantity);
+      await cartAPI.addItem(itemToUpdate.product.id, quantity);
       
       // Refetch cart after update
       const cartItems = await cartAPI.getItems();
@@ -184,10 +189,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Clear cart
-  const clearCart = () => {
-  const clearCart = () => {
+  const clearCart = async () => {
     setLoading(true);
+    setError(null);
     try {
+      // Call API to clear cart if available
+      // await cartAPI.clearCart();
       setItems([]);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to clear cart');
@@ -196,14 +203,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
   };
-
-  // Calculate derived values
-  const totalPrice = items.reduce((total, item) => {
-    const price = item.product.sale_price || item.product.price;
-    return total + (price * item.quantity);
-  }, 0);
-
-  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
 
   return (
     <CartContext.Provider value={{
