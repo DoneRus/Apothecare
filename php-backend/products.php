@@ -11,22 +11,28 @@ $method = $_SERVER['REQUEST_METHOD'];
 try {
     switch ($method) {
         case 'GET':
-            // Get all products or a single product
+            // Check if a specific product ID was requested
             if (isset($_GET['id'])) {
                 $id = $_GET['id'];
+                // Prepare a secure query with parameterized statement to prevent SQL injection
                 $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ?");
-                $stmt->execute([$id]);
+                $stmt->execute([$id]); // Execute query with the product ID
                 
+                // Check if a product with this ID exists
                 if ($stmt->rowCount() > 0) {
-                    $product = $stmt->fetch();
+                    $product = $stmt->fetch(); // Fetch the product data as associative array
+                    // Convert PHP array to JSON and send to client
                     echo json_encode($product);
                 } else {
+                    // Product not found - return 404 error
                     http_response_code(404);
                     echo json_encode(['error' => 'Product not found']);
                 }
             } else {
+                // No specific ID - get all products
                 $stmt = $pdo->query("SELECT * FROM products");
-                $products = $stmt->fetchAll();
+                $products = $stmt->fetchAll(); // Fetch all products as array
+                // Convert PHP array to JSON and send to client
                 echo json_encode($products);
             }
             break;
