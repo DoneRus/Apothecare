@@ -1,8 +1,11 @@
 'use client';
 
 import AdminLayout from '@/components/admin/AdminLayout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import ProductForm from '@/components/admin/ProductForm';
+import { Product } from '@/data/products';
+import { productsAPI } from '@/services/api';
 
 // Simple icon components to replace Heroicons
 const FilterIcon = () => (
@@ -17,91 +20,153 @@ const ChevronDownIcon = () => (
   </svg>
 );
 
-type ProductCategory = 'Prescription' | 'Over-The-Counter' | 'Supplements' | 'Personal Care' | 'All';
+type ProductCategory = string | 'All';
 type ProductStatus = 'In Stock' | 'Low Stock' | 'Out of Stock' | 'All';
 
-interface Product {
-  id: string;
-  name: string;
-  category: ProductCategory;
-  price: string;
-  stock: number;
-  status: ProductStatus;
-}
-
 export default function ProductsPage() {
-  // Products data
-  const allProducts: Product[] = [
-    { id: 'P001', name: 'Paracetamol 500mg', category: 'Over-The-Counter', price: '9.99', stock: 250, status: 'In Stock' },
-    { id: 'P002', name: 'Amoxicillin 250mg', category: 'Prescription', price: '12.50', stock: 120, status: 'In Stock' },
-    { id: 'P003', name: 'Vitamin D3 1000IU', category: 'Supplements', price: '14.99', stock: 75, status: 'In Stock' },
-    { id: 'P004', name: 'Hand Sanitizer 250ml', category: 'Personal Care', price: '4.99', stock: 45, status: 'Low Stock' },
-    { id: 'P005', name: 'Ibuprofen 200mg', category: 'Over-The-Counter', price: '7.99', stock: 180, status: 'In Stock' },
-    { id: 'P006', name: 'Atorvastatin 10mg', category: 'Prescription', price: '22.50', stock: 0, status: 'Out of Stock' },
-    { id: 'P007', name: 'Multivitamin Complex', category: 'Supplements', price: '19.99', stock: 95, status: 'In Stock' },
-    { id: 'P008', name: 'First Aid Kit Basic', category: 'Personal Care', price: '29.99', stock: 15, status: 'Low Stock' },
-    { id: 'P009', name: 'Aspirin 75mg', category: 'Over-The-Counter', price: '5.99', stock: 210, status: 'In Stock' },
-    { id: 'P010', name: 'Omeprazole 20mg', category: 'Prescription', price: '15.50', stock: 0, status: 'Out of Stock' },
-  ];
-
   // State variables
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory>('All');
   const [selectedStatus, setSelectedStatus] = useState<ProductStatus>('All');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [activeProductId, setActiveProductId] = useState<string | null>(null);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-
+  
+  // Modal states
+  const [formModalOpen, setFormModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  
+  // Fetch products on component mount
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+  
+  // Fetch products from API
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const data = await productsAPI.getAll();
+      setProducts(data);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch products');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Handle product creation/update success
+  const handleProductSuccess = (product: Product) => {
+    if (selectedProduct) {
+      // Update existing product in the list
+      setProducts(products.map(p => p.id === product.id ? product : p));
+    } else {
+      // Add new product to the list
+      setProducts([...products, product]);
+    }
+    
+    setFormModalOpen(false);
+    setSelectedProduct(null);
+  };
+  
+  // Get categories from products
+  const categories = [
+    'All',
+    ...Array.from(new Set(products.map(product => product.category)))
+  ];
+  
+  // Get stock status based on quantity
+  const getStockStatus = (stock: number): ProductStatus => {
+    if (stock <= 0) return 'Out of Stock';
+    if (stock < 50) return 'Low Stock';
+    return 'In Stock';
+  };
+  
   // Filter products based on search and filters
-  const filteredProducts = allProducts.filter(product => {
+  const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         product.id.toLowerCase().includes(searchTerm.toLowerCase());
+                         (product.id?.toString() || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-    const matchesStatus = selectedStatus === 'All' || product.status === selectedStatus;
+    
+    // Get status from product stock
+    let productStatus: ProductStatus = 'In Stock'; // Default
+    
+    // We don't have stock field in our Product type, so we'll assume products are in stock
+    // In a real application, you would use the actual stock field
+    
+    const matchesStatus = selectedStatus === 'All' || productStatus === selectedStatus;
     
     return matchesSearch && matchesCategory && matchesStatus;
   });
-
+  
   // Toggle filter dropdown
   const toggleFilter = () => {
     setIsFilterOpen(!isFilterOpen);
   };
-
+  
   // Handle view product
-  const handleViewProduct = (id: string) => {
-    setActiveProductId(id);
-    setModalOpen(true);
+  const handleViewProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setViewModalOpen(true);
   };
-
-  // Handle edit product (this would normally open a form)
-  const handleEditProduct = (id: string) => {
-    // In a real app, this would open an edit form or navigate to edit page
-    alert(`Edit product ${id}`);
+  
+  // Handle edit product
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setFormModalOpen(true);
   };
-
+  
   // Handle delete confirmation
-  const handleDeleteClick = (id: string) => {
-    setActiveProductId(id);
+  const handleDeleteClick = (product: Product) => {
+    setSelectedProduct(product);
     setDeleteModalOpen(true);
   };
-
+  
   // Handle actual deletion
-  const confirmDelete = () => {
-    // In a real app, this would make an API call to delete the product
-    alert(`Product ${activeProductId} would be deleted`);
-    setDeleteModalOpen(false);
-    setActiveProductId(null);
+  const confirmDelete = async () => {
+    if (!selectedProduct) return;
+    
+    try {
+      await productsAPI.delete(selectedProduct.id);
+      
+      // Remove product from the list
+      setProducts(products.filter(p => p.id !== selectedProduct.id));
+      setDeleteModalOpen(false);
+      setSelectedProduct(null);
+    } catch (err) {
+      console.error('Error deleting product:', err);
+      alert(`Failed to delete product: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    }
   };
-
-  // Get active product for modal
-  const activeProduct = activeProductId ? allProducts.find(p => p.id === activeProductId) : null;
+  
+  // Format price with euro sign
+  const formatPrice = (price: number | string) => {
+    const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
+    return `€${numericPrice.toFixed(2)}`;
+  };
 
   return (
     <AdminLayout
       title="Products"
       subtitle="Manage your pharmacy products"
     >
+      {error && (
+        <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
+          {error}
+          <button 
+            onClick={fetchProducts} 
+            className="ml-2 underline"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+      
       {/* Actions Header */}
       <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
         <div className="flex-1 mb-4 md:mb-0">
@@ -139,7 +204,7 @@ export default function ProductsPage() {
                   <div className="px-4 py-2">
                     <p className="text-sm font-medium text-gray-900">Category</p>
                     <div className="mt-2 space-y-2">
-                      {['Prescription', 'Over-The-Counter', 'Supplements', 'Personal Care', 'All'].map((category) => (
+                      {categories.map((category) => (
                         <div key={category} className="flex items-center">
                           <input
                             id={`category-${category}`}
@@ -203,7 +268,10 @@ export default function ProductsPage() {
           </div>
           
           <button 
-            onClick={() => alert("Add product functionality would open a form")}
+            onClick={() => {
+              setSelectedProduct(null);
+              setFormModalOpen(true);
+            }}
             className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 flex items-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -215,239 +283,326 @@ export default function ProductsPage() {
       </div>
       
       {/* Products Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Product
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 flex-shrink-0 bg-gray-100 rounded-md flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">ID: {product.id}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{product.category}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">${product.price}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{product.stock}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      statusColors[product.status]
-                    }`}>
-                      {product.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex justify-end space-x-2">
-                      <button 
-                        onClick={() => handleViewProduct(product.id)}
-                        className="text-gray-500 hover:text-gray-700"
-                        aria-label="View product"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      </button>
-                      <button 
-                        onClick={() => handleEditProduct(product.id)}
-                        className="text-blue-500 hover:text-blue-700"
-                        aria-label="Edit product"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteClick(product.id)}
-                        className="text-red-500 hover:text-red-700"
-                        aria-label="Delete product"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
+      {loading ? (
+        <div className="bg-white rounded-lg shadow p-8 flex justify-center">
+          <div className="animate-pulse flex flex-col items-center">
+            <div className="h-12 w-12 rounded-full bg-gray-300 mb-4"></div>
+            <div className="h-4 w-48 bg-gray-300 rounded mb-4"></div>
+            <div className="h-4 w-32 bg-gray-300 rounded"></div>
+          </div>
+        </div>
+      ) : filteredProducts.length === 0 ? (
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 className="text-lg font-medium text-gray-900 mb-1">No products found</h3>
+          <p className="text-gray-500">
+            {searchTerm || selectedCategory !== 'All' || selectedStatus !== 'All' ? (
+              <>Try changing your search or filter criteria</>
+            ) : (
+              <>No products have been added yet</>
+            )}
+          </p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Product
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Category
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Price
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        
-        {/* Pagination */}
-        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-          <div className="flex-1 flex justify-between sm:hidden">
-            <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              Previous
-            </button>
-            <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              Next
-            </button>
-          </div>
-          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredProducts.length}</span> of{' '}
-                <span className="font-medium">{filteredProducts.length}</span> results
-              </p>
-            </div>
-            <div>
-              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  <span className="sr-only">Previous</span>
-                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-primary text-sm font-medium text-white">
-                  1
-                </button>
-                <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  <span className="sr-only">Next</span>
-                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                  </svg>
-                </button>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Product View Modal */}
-      {modalOpen && activeProduct && (
-        <div className="fixed inset-0 overflow-y-auto z-50">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">{activeProduct.name}</h3>
-                    <div className="mt-4 grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-gray-500">ID</p>
-                        <p className="text-sm font-medium text-gray-900">{activeProduct.id}</p>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredProducts.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden">
+                          {product.image_url ? (
+                            <img 
+                              src={product.image_url} 
+                              alt={product.name} 
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-gray-500">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900 flex items-center">
+                            {product.name}
+                            {product.is_new && (
+                              <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
+                                New
+                              </span>
+                            )}
+                            {product.is_featured && (
+                              <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                                Featured
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-500 truncate max-w-xs">
+                            {product.description}
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Category</p>
-                        <p className="text-sm font-medium text-gray-900">{activeProduct.category}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Price</p>
-                        <p className="text-sm font-medium text-gray-900">${activeProduct.price}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Stock</p>
-                        <p className="text-sm font-medium text-gray-900">{activeProduct.stock}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Status</p>
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          statusColors[activeProduct.status]
-                        }`}>
-                          {activeProduct.status}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        {product.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {product.sale_price ? (
+                        <div>
+                          <span className="text-sm font-medium text-gray-900">
+                            {formatPrice(product.sale_price)}
+                          </span>
+                          <span className="ml-2 text-xs text-gray-500 line-through">
+                            {formatPrice(product.price)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatPrice(product.price)}
                         </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        In Stock
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button 
+                        onClick={() => handleViewProduct(product)} 
+                        className="text-indigo-600 hover:text-indigo-900 mr-3"
+                      >
+                        View
+                      </button>
+                      <button 
+                        onClick={() => handleEditProduct(product)} 
+                        className="text-green-600 hover:text-green-900 mr-3"
+                      >
+                        Edit
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteClick(product)} 
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+      
+      {/* Product Form Modal */}
+      {formModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="w-full max-w-4xl">
+            <ProductForm 
+              product={selectedProduct || undefined}
+              onClose={() => {
+                setFormModalOpen(false);
+                setSelectedProduct(null);
+              }}
+              onSuccess={handleProductSuccess}
+            />
+          </div>
+        </div>
+      )}
+      
+      {/* View Product Modal */}
+      {viewModalOpen && selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start">
+                <h2 className="text-xl font-bold mb-4">{selectedProduct.name}</h2>
+                <button 
+                  onClick={() => {
+                    setViewModalOpen(false);
+                    setSelectedProduct(null);
+                  }}
+                  className="p-1 rounded-full hover:bg-gray-100"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="md:w-1/3">
+                  <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+                    {selectedProduct.image_url ? (
+                      <img 
+                        src={selectedProduct.image_url} 
+                        alt={selectedProduct.name} 
+                        className="w-full h-full object-cover" 
+                      />
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="md:w-2/3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Category</h3>
+                      <p className="mt-1">{selectedProduct.category}</p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Price</h3>
+                      <p className="mt-1">
+                        {selectedProduct.sale_price ? (
+                          <>
+                            <span className="font-medium">{formatPrice(selectedProduct.sale_price)}</span>
+                            <span className="ml-2 text-sm text-gray-500 line-through">{formatPrice(selectedProduct.price)}</span>
+                          </>
+                        ) : (
+                          <span className="font-medium">{formatPrice(selectedProduct.price)}</span>
+                        )}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Rating</h3>
+                      <div className="mt-1 flex items-center">
+                        <div className="flex">
+                          {[...Array(5)].map((_, i) => (
+                            <svg 
+                              key={i} 
+                              xmlns="http://www.w3.org/2000/svg" 
+                              className={`h-4 w-4 ${i < selectedProduct.rating ? 'text-yellow-400' : 'text-gray-300'}`} 
+                              viewBox="0 0 20 20" 
+                              fill="currentColor"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                          ))}
+                        </div>
+                        <span className="ml-2 text-sm text-gray-600">({selectedProduct.reviews} reviews)</span>
                       </div>
                     </div>
+                    
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-500">Status</h3>
+                      <p className="mt-1">
+                        <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                          In Stock
+                        </span>
+                      </p>
+                    </div>
+                    
+                    <div className="col-span-2">
+                      <h3 className="text-sm font-medium text-gray-500">Description</h3>
+                      <p className="mt-1 text-sm text-gray-700">{selectedProduct.description}</p>
+                    </div>
+                    
+                    {selectedProduct.properties && Object.keys(selectedProduct.properties).length > 0 && (
+                      <div className="col-span-2">
+                        <h3 className="text-sm font-medium text-gray-500 mb-2">Properties</h3>
+                        <div className="grid grid-cols-2 gap-2">
+                          {Object.entries(selectedProduct.properties).map(([key, value]) => (
+                            <div key={key} className="flex">
+                              <span className="font-medium text-sm">{key}:</span>
+                              <span className="ml-1 text-sm">{String(value)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button 
-                  type="button" 
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => setModalOpen(false)}
+              
+              <div className="mt-6 flex justify-end space-x-3">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setViewModalOpen(false);
+                    setSelectedProduct(null);
+                  }}
                 >
                   Close
-                </button>
+                </Button>
+                <Button
+                  onClick={() => {
+                    setViewModalOpen(false);
+                    handleEditProduct(selectedProduct);
+                  }}
+                >
+                  Edit Product
+                </Button>
               </div>
             </div>
           </div>
         </div>
       )}
-
+      
       {/* Delete Confirmation Modal */}
-      {deleteModalOpen && activeProductId && (
-        <div className="fixed inset-0 overflow-y-auto z-50">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                  </div>
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Delete Product</h3>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">Are you sure you want to delete this product? This action cannot be undone.</p>
-                    </div>
-                  </div>
-                </div>
+      {deleteModalOpen && selectedProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+            <div className="p-6">
+              <div className="flex items-center justify-center mb-4 text-red-500">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
               </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button 
-                  type="button" 
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={confirmDelete}
-                >
-                  Delete
-                </button>
-                <button 
-                  type="button" 
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              <h3 className="text-lg font-medium text-gray-900 text-center mb-2">
+                Delete Product
+              </h3>
+              <p className="text-gray-500 text-center mb-6">
+                Are you sure you want to delete "{selectedProduct.name}"? This action cannot be undone.
+              </p>
+              <div className="flex justify-center space-x-3">
+                <Button
+                  variant="outline"
                   onClick={() => {
                     setDeleteModalOpen(false);
-                    setActiveProductId(null);
+                    setSelectedProduct(null);
                   }}
                 >
                   Cancel
-                </button>
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmDelete}
+                >
+                  Delete
+                </Button>
               </div>
             </div>
           </div>
@@ -455,11 +610,4 @@ export default function ProductsPage() {
       )}
     </AdminLayout>
   );
-}
-
-const statusColors: Record<ProductStatus, string> = {
-  'In Stock': 'bg-green-100 text-green-800',
-  'Low Stock': 'bg-yellow-100 text-yellow-800',
-  'Out of Stock': 'bg-red-100 text-red-800',
-  'All': '',
-}; 
+} 

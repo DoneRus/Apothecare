@@ -97,7 +97,7 @@ export default function CartPage() {
               <Link href="/dashboard">Browse Products</Link>
             </Button>
           </motion.div>
-        </div>
+          </div>
       </motion.div>
     );
   }
@@ -126,7 +126,7 @@ export default function CartPage() {
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-              </svg>
+                </svg>
               Clear Cart
             </Button>
           </div>
@@ -160,8 +160,8 @@ export default function CartPage() {
                     <p className="text-[#10B981] font-medium">
                       €{((item.product.sale_price || item.product.price) * item.quantity).toFixed(2)}
                     </p>
+                    </div>
                   </div>
-                </div>
 
                 <div className="flex items-center space-x-6">
                   <div className="flex items-center space-x-1">
@@ -169,31 +169,31 @@ export default function CartPage() {
                       variant="ghost"
                       onClick={() => item.id && updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                       className="text-gray-600 hover:text-[#10B981] hover:bg-gray-100 p-2 rounded-full"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
-                      </svg>
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
+                        </svg>
                     </Button>
                     <span className="w-12 text-center font-medium text-gray-700">{item.quantity}</span>
                     <Button
                       variant="ghost"
                       onClick={() => item.id && updateQuantity(item.id, item.quantity + 1)}
                       className="text-gray-600 hover:text-[#10B981] hover:bg-gray-100 p-2 rounded-full"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                      </svg>
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
                     </Button>
-                  </div>
+                    </div>
 
                   <Button
                     variant="ghost"
                     onClick={() => item.id && removeItem(item.id)}
                     className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                        </svg>
                   </Button>
                 </div>
               </motion.div>
@@ -208,7 +208,7 @@ export default function CartPage() {
               <div>
                 <p className="text-gray-600 mb-1">Total Amount</p>
                 <p className="text-3xl font-bold text-gray-800">€{totalPrice.toFixed(2)}</p>
-              </div>
+            </div>
               <div className="flex items-center gap-4">
                 <Button variant="secondary" className="w-full md:w-auto">
                   <Link href="/dashboard">Continue Shopping</Link>
@@ -221,11 +221,11 @@ export default function CartPage() {
                     </svg>
                   </Link>
                 </Button>
-              </div>
+            </div>
             </div>
           </motion.div>
         </motion.div>
-      </div>
+            </div>
     </motion.div>
   );
 } 

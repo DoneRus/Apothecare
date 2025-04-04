@@ -19,7 +19,6 @@ interface CartContextType {
   error: string | null;
   itemCount: number;
   totalPrice: number;
-  itemCount: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -27,15 +26,8 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 // Mock implementation for development
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Calculate derived values
-  const itemCount = items.reduce((count, item) => count + item.quantity, 0);
-  const totalPrice = items.reduce(
-    (total, item) => total + (item.product.price * item.quantity), 
-    0
-  );
 
   // Add item to cart
   const addItem = (product: Product, quantity: number) => {
@@ -113,6 +105,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Calculate derived values
   const totalPrice = items.reduce((total, item) => {
     const price = item.product.sale_price || item.product.price;
     return total + (price * item.quantity);

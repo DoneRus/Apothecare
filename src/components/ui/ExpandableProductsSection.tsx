@@ -22,12 +22,14 @@ export function ExpandableProductsSection({
   const [error, setError] = useState<string | null>(null);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>(initialFeaturedProducts || []);
   const [allProducts, setAllProducts] = useState<Product[]>(initialAllProducts || []);
+  const [loadingProducts, setLoadingProducts] = useState<Record<number, boolean>>({});
   
-  const { addItem, loading: cartLoading } = useCart();
+  const { addItem } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        setLoading(true);
         const [featured, all] = await Promise.all([
           productsAPI.getFeatured(),
           productsAPI.getAll()
@@ -47,23 +49,26 @@ export function ExpandableProductsSection({
       }
     };
 
-    // Only fetch if we don't have initial data
-    if ((!initialFeaturedProducts || !initialFeaturedProducts.length) &&
-        (!initialAllProducts || !initialAllProducts.length)) {
-      fetchProducts();
-    } else {
-      setLoading(false);
-    }
+    // Always fetch products to ensure latest data from the database
+    fetchProducts();
   }, [initialFeaturedProducts, initialAllProducts]);
   
   // Function to handle adding product to cart
   const handleAddToCart = async (product: Product) => {
     try {
+      // Set loading state for this specific product
+      setLoadingProducts(prev => ({ ...prev, [product.id]: true }));
+      
       setAnimatingProduct(product);
       await addItem(product, 1);
     } catch (error) {
       console.error('Failed to add item to cart:', error);
       // You might want to show an error toast here
+    } finally {
+      // Clear loading state for this specific product
+      setTimeout(() => {
+        setLoadingProducts(prev => ({ ...prev, [product.id]: false }));
+      }, 500); // Small delay to ensure animation completes
     }
   };
 
@@ -264,11 +269,11 @@ export function ExpandableProductsSection({
                         </div>
                         
                         <button 
-                          disabled={cartLoading}
+                          disabled={loadingProducts[product.id]}
                           onClick={() => handleAddToCart(product)}
                           className={`px-4 py-2 rounded-lg ${buttonClass} ${hoverClass} transition-colors duration-200 flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed w-full`}
                         >
-                          {cartLoading ? (
+                          {loadingProducts[product.id] ? (
                             <>
                               <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

@@ -42,11 +42,30 @@ export const productsAPI = {
                 rating: parseFloat(product.rating),
                 reviews: parseInt(product.reviews),
                 properties: product.properties ? JSON.parse(product.properties) : {},
-                is_new: Boolean(product.is_new),
-                is_featured: Boolean(product.is_featured)
+                is_new: Boolean(parseInt(product.is_new)),
+                is_featured: Boolean(parseInt(product.is_featured))
             }));
         } catch (error) {
             console.error('Error fetching products:', error);
+            throw error;
+        }
+    },
+
+    getById: async (id: number) => {
+        try {
+            const product = await fetchFromAPI(`products.php?id=${id}`);
+            return {
+                ...product,
+                price: parseFloat(product.price),
+                sale_price: product.sale_price ? parseFloat(product.sale_price) : undefined,
+                rating: parseFloat(product.rating),
+                reviews: parseInt(product.reviews),
+                properties: product.properties ? JSON.parse(product.properties) : {},
+                is_new: Boolean(parseInt(product.is_new)),
+                is_featured: Boolean(parseInt(product.is_featured))
+            };
+        } catch (error) {
+            console.error(`Error fetching product ${id}:`, error);
             throw error;
         }
     },
@@ -55,7 +74,7 @@ export const productsAPI = {
         try {
             const products = await fetchFromAPI('products.php');
             return products
-                .filter((product: any) => product.is_featured)
+                .filter((product: any) => parseInt(product.is_featured) === 1)
                 .map((product: any) => ({
                     ...product,
                     price: parseFloat(product.price),
@@ -63,8 +82,8 @@ export const productsAPI = {
                     rating: parseFloat(product.rating),
                     reviews: parseInt(product.reviews),
                     properties: product.properties ? JSON.parse(product.properties) : {},
-                    is_new: Boolean(product.is_new),
-                    is_featured: Boolean(product.is_featured)
+                    is_new: Boolean(parseInt(product.is_new)),
+                    is_featured: Boolean(parseInt(product.is_featured))
                 }));
         } catch (error) {
             console.error('Error fetching featured products:', error);
@@ -73,10 +92,77 @@ export const productsAPI = {
     },
 
     add: async (product: any) => {
-        return fetchFromAPI('products.php', {
-            method: 'POST',
-            body: JSON.stringify(product)
-        });
+        try {
+            const result = await fetchFromAPI('products.php', {
+                method: 'POST',
+                body: JSON.stringify(product)
+            });
+            
+            if (result.product) {
+                result.product = {
+                    ...result.product,
+                    price: parseFloat(result.product.price),
+                    sale_price: result.product.sale_price ? parseFloat(result.product.sale_price) : null,
+                    rating: parseFloat(result.product.rating),
+                    reviews: parseInt(result.product.reviews),
+                    properties: result.product.properties ? 
+                        (typeof result.product.properties === 'string' ? 
+                            JSON.parse(result.product.properties) : 
+                            result.product.properties) : 
+                        {},
+                    is_new: Boolean(result.product.is_new),
+                    is_featured: Boolean(result.product.is_featured)
+                };
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('Error adding product:', error);
+            throw error;
+        }
+    },
+
+    update: async (id: number, product: any) => {
+        try {
+            const result = await fetchFromAPI(`products.php?id=${id}`, {
+                method: 'PUT',
+                body: JSON.stringify(product)
+            });
+            
+            if (result.product) {
+                result.product = {
+                    ...result.product,
+                    price: parseFloat(result.product.price),
+                    sale_price: result.product.sale_price ? parseFloat(result.product.sale_price) : null,
+                    rating: parseFloat(result.product.rating),
+                    reviews: parseInt(result.product.reviews),
+                    properties: result.product.properties ? 
+                        (typeof result.product.properties === 'string' ? 
+                            JSON.parse(result.product.properties) : 
+                            result.product.properties) : 
+                        {},
+                    is_new: Boolean(result.product.is_new),
+                    is_featured: Boolean(result.product.is_featured)
+                };
+            }
+            
+            return result;
+        } catch (error) {
+            console.error(`Error updating product ${id}:`, error);
+            throw error;
+        }
+    },
+
+    delete: async (id: number) => {
+        try {
+            const result = await fetchFromAPI(`products.php?id=${id}`, {
+                method: 'DELETE'
+            });
+            return result;
+        } catch (error) {
+            console.error(`Error deleting product ${id}:`, error);
+            throw error;
+        }
     },
 
     uploadImage: async (productId: number, imageFile: File) => {
