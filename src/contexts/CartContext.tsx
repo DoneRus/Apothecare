@@ -4,6 +4,21 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Product } from '../data/products';
 import { cartAPI } from '../services/api';
 
+// Define the structure of cart item from API
+interface CartItemApiResponse {
+  id: number;
+  product_id: number;
+  name: string;
+  category: string;
+  description: string;
+  price: string;
+  rating: string;
+  reviews: number;
+  properties: string | null;
+  is_new: number | boolean;
+  quantity: number;
+}
+
 type CartItem = {
   id?: number;  // Cart item ID from backend
   product: Product;
@@ -12,15 +27,14 @@ type CartItem = {
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product, quantity: number) => Promise<void>;
-  removeItem: (productId: number) => Promise<void>;
-  updateQuantity: (productId: number, quantity: number) => Promise<void>;
-  clearCart: () => Promise<void>;
+  addItem: (product: Product, quantity: number) => void;
+  removeItem: (cartItemId: number) => void;
+  updateQuantity: (cartItemId: number, quantity: number) => void;
+  clearCart: () => void;
   loading: boolean;
   error: string | null;
   itemCount: number;
   totalPrice: number;
-  itemCount: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -31,11 +45,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   // Calculate derived values
-  const itemCount = items.reduce((count, item) => count + item.quantity, 0);
-  const totalPrice = items.reduce(
-    (total, item) => total + (item.product.price * item.quantity), 
-    0
-  );
+  const totalPrice = items.reduce((total, item) => {
+    const price = item.product.sale_price || item.product.price;
+    return total + (price * item.quantity);
+  }, 0);
+
+  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
 
   // Fetch cart items on component mount
   useEffect(() => {
@@ -46,7 +61,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const cartItems = await cartAPI.getItems();
         
         // Transform API response to match our CartItem structure
-        const transformedItems = cartItems.map((item: any) => ({
+        const transformedItems = cartItems.map((item: CartItemApiResponse) => ({
           id: item.id,
           product: {
             id: item.product_id,
@@ -63,7 +78,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }));
         
         setItems(transformedItems);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching cart:', err);
         setError('Failed to load cart items');
       } finally {
@@ -86,7 +101,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const cartItems = await cartAPI.getItems();
       
       // Transform API response
-      const transformedItems = cartItems.map((item: any) => ({
+      const transformedItems = cartItems.map((item: CartItemApiResponse) => ({
         id: item.id,
         product: {
           id: item.product_id,
@@ -103,7 +118,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }));
       
       setItems(transformedItems);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error adding item to cart:', err);
       setError('Failed to add item to cart');
     } finally {
@@ -119,7 +134,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       await cartAPI.removeItem(cartItemId);
       setItems(items.filter(item => item.id !== cartItemId));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error removing item from cart:', err);
       setError('Failed to remove item from cart');
     } finally {
@@ -151,7 +166,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const cartItems = await cartAPI.getItems();
       
       // Transform API response
-      const transformedItems = cartItems.map((item: any) => ({
+      const transformedItems = cartItems.map((item: CartItemApiResponse) => ({
         id: item.id,
         product: {
           id: item.product_id,
@@ -168,7 +183,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }));
       
       setItems(transformedItems);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error updating cart item:', err);
       setError('Failed to update cart item');
     } finally {
@@ -177,27 +192,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Clear cart
-  const clearCart = async () => {
+  const clearCart = () => {
     setLoading(true);
-    setError(null);
-    
     try {
-      await cartAPI.clearCart();
       setItems([]);
-    } catch (err) {
+    } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to clear cart');
       throw err;
     } finally {
       setLoading(false);
     }
   };
-
-  const totalPrice = items.reduce((total, item) => {
-    const price = item.product.sale_price || item.product.price;
-    return total + (price * item.quantity);
-  }, 0);
-
-  const itemCount = items.reduce((total, item) => total + item.quantity, 0);
 
   return (
     <CartContext.Provider value={{
