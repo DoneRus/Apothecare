@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import { Product } from '../data/products';
 import { cartAPI } from '../services/api';
 
@@ -20,13 +20,17 @@ interface CartItemApiResponse {
 }
 
 type CartItem = {
-  id?: number;  // Cart item ID from backend
+  id: number;  // Cart item ID
   product: Product;
   quantity: number;
 }
 
 interface CartContextType {
   items: CartItem[];
+  addItem: (product: Product, quantity: number) => void;
+  removeItem: (cartItemId: number) => void;
+  updateQuantity: (cartItemId: number, quantity: number) => void;
+  clearCart: () => void;
   addItem: (product: Product, quantity: number) => void;
   removeItem: (cartItemId: number) => void;
   updateQuantity: (cartItemId: number, quantity: number) => void;
@@ -39,6 +43,7 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+// Mock implementation for development
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,7 +95,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Add item to cart
-  const addItem = async (product: Product, quantity: number) => {
+  const addItem = (product: Product, quantity: number) => {
     setLoading(true);
     setError(null);
     
@@ -127,12 +132,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Remove item from cart
-  const removeItem = async (cartItemId: number) => {
+  const removeItem = (cartItemId: number) => {
     setLoading(true);
-    setError(null);
-    
     try {
-      await cartAPI.removeItem(cartItemId);
       setItems(items.filter(item => item.id !== cartItemId));
     } catch (err: unknown) {
       console.error('Error removing item from cart:', err);
@@ -143,17 +145,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Update item quantity
-  const updateQuantity = async (cartItemId: number, quantity: number) => {
-    // Find the item
-    const item = items.find(item => item.id === cartItemId);
-    if (!item) return;
-    
-    if (quantity <= 0) {
-      // Remove item if quantity is 0 or negative
-      await removeItem(cartItemId);
-      return;
-    }
-    
+  const updateQuantity = (cartItemId: number, quantity: number) => {
     setLoading(true);
     setError(null);
     
@@ -192,6 +184,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Clear cart
+  const clearCart = () => {
   const clearCart = () => {
     setLoading(true);
     try {
