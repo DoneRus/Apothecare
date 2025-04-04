@@ -18,6 +18,15 @@ module.exports = {
         sans: ['var(--font-sans)'],
         mono: ['var(--font-mono)'],
       },
+      keyframes: {
+        slideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: 0 },
+          '100%': { transform: 'translateY(0)', opacity: 1 }
+        }
+      },
+      animation: {
+        slideUp: 'slideUp 0.3s ease forwards'
+      }
     },
   },
   safelist: [

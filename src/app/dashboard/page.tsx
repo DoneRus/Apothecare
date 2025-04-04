@@ -6,6 +6,7 @@ import { ExpandableProductsSection } from '../../components/ui/ExpandableProduct
 import { HeaderNavigation } from '../../components/ui/HeaderNavigation';
 import { HeaderCartButton } from '../../components/ui/HeaderCartButton';
 import { TestimonialsSection } from '../../components/ui/TestimonialsSection';
+import { DashboardClientWrapper } from '../../components/ui/DashboardClientWrapper';
 
 export const metadata: Metadata = {
   title: 'Dashboard | ApotheCare',
@@ -256,9 +257,12 @@ export default function DashboardPage() {
           </div>
         </section>
       </main>
-
+      
+      {/* Chatbot */}
+      <DashboardClientWrapper />
+      
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-gray-800 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
