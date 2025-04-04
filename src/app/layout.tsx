@@ -21,6 +21,10 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        
+        {/* ApotheCare Chatbot Integration */}
+        <div id="deployment-ef250951-ff15-4297-9818-ccd956d1d2dc"></div>
+        <script src="https://studio.pickaxe.co/api/embed/bundle.js" defer></script>
       </body>
     </html>
   );
