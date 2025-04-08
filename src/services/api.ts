@@ -282,4 +282,63 @@ export const setupAPI = {
     initDatabase: async () => {
         return fetchFromAPI('setup.php');
     }
+};
+
+export const customersAPI = {
+    getAll: async () => {
+        const response = await fetch(`${API_BASE_URL}/customers.php`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch customers');
+        }
+        return response.json();
+    },
+    
+    getById: async (id: string) => {
+        const response = await fetch(`${API_BASE_URL}/customers.php?id=${id}`);
+        if (!response.ok) {
+            throw new Error('Failed to fetch customer');
+        }
+        return response.json();
+    },
+    
+    create: async (data: any) => {
+        const response = await fetch(`${API_BASE_URL}/customers.php`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to create customer');
+        }
+        return response.json();
+    },
+    
+    update: async (id: string, data: any) => {
+        const response = await fetch(`${API_BASE_URL}/customers.php?id=${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to update customer');
+        }
+        return response.json();
+    },
+    
+    delete: async (id: string) => {
+        const response = await fetch(`${API_BASE_URL}/customers.php?id=${id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to delete customer');
+        }
+        return response.json();
+    },
 }; 
