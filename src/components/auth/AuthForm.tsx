@@ -16,6 +16,7 @@ export default function AuthForm({ type }: AuthFormProps) {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,17 +28,47 @@ export default function AuthForm({ type }: AuthFormProps) {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    setSuccess(false);
 
     try {
-      // This would normally connect to an API endpoint
-      // For now, we'll simulate an authentication process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log(`${type} successful`, formData);
-      
-      router.push('/dashboard');
-    } catch (err) {
-      setError('Authentication failed. Please try again.');
-      console.error(err);
+      const response = await fetch('http://localhost/apothecare/php-backend/auth.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          action: type,
+          ...formData,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // For login errors, show a user-friendly message
+        if (type === 'login') {
+          setError('Invalid email or password');
+        } else {
+          setError(data.error || 'Registration failed. Please try again.');
+        }
+        return;
+      }
+
+      if (type === 'register') {
+        setSuccess(true);
+        // Show success message for 2 seconds before redirecting
+        setTimeout(() => {
+          router.push('/auth/login');
+        }, 2000);
+      } else {
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify(data.user));
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      // Show a user-friendly error message without logging to console
+      setError(type === 'login' ? 'Invalid email or password' : 'Authentication failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +87,17 @@ export default function AuthForm({ type }: AuthFormProps) {
         {error && (
           <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
             {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md text-sm animate-fade-in">
+            <div className="flex items-center justify-center">
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Registration successful! Redirecting to login...
+            </div>
           </div>
         )}
 
@@ -111,7 +153,7 @@ export default function AuthForm({ type }: AuthFormProps) {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || success}
           className="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 transition duration-200 ease-in-out disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isLoading ? (
