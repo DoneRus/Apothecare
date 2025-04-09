@@ -341,4 +341,25 @@ export const customersAPI = {
         }
         return response.json();
     },
+};
+
+// LLM API for AI assistants
+export const llmAPI = {
+    chat: async (messages: Array<{role: string, content: string}>, options: any = {}) => {
+        try {
+            return fetchFromAPI('llm.php', {
+                method: 'POST',
+                body: JSON.stringify({
+                    messages,
+                    model: options.model || 'mistral-small',
+                    temperature: options.temperature || 0.7,
+                    max_tokens: options.max_tokens || 2000,
+                    top_p: options.top_p || 1.0
+                })
+            });
+        } catch (error) {
+            console.error('Error calling LLM API:', error);
+            throw error;
+        }
+    }
 }; 

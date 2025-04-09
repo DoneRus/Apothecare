@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '../providers';
+import ChatWidget from '@/components/AI/ChatWidget';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,11 +21,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           {children}
+          <ChatWidget />
         </Providers>
-        
-        {/* ApotheCare Chatbot Integration */}
-        <div id="deployment-ef250951-ff15-4297-9818-ccd956d1d2dc"></div>
-        <script src="https://studio.pickaxe.co/api/embed/bundle.js" defer></script>
       </body>
     </html>
   );
