@@ -54,9 +54,36 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [salesData, setSalesData] = useState<any>(null);
   const [cartItems, setCartItems] = useState<any[]>([]);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    loadData();
+    // Check if user is admin
+    const checkAuth = () => {
+      if (typeof window !== 'undefined') {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          try {
+            const user = JSON.parse(userData);
+            // Check if user is admin
+            if (user.email === 'admin@gmail.com' || user.role === 'admin') {
+              setIsAuthorized(true);
+              loadData();
+            } else {
+              // Redirect to login if not admin
+              window.location.href = '/auth/login';
+            }
+          } catch (err) {
+            // Redirect to login if user data is invalid
+            window.location.href = '/auth/login';
+          }
+        } else {
+          // Redirect to login if no user data
+          window.location.href = '/auth/login';
+        }
+      }
+    };
+    
+    checkAuth();
   }, []);
 
   const loadData = async () => {
@@ -152,6 +179,19 @@ export default function AdminPage() {
   };
 
   const metrics = getMetrics();
+
+  if (!isAuthorized) {
+    return (
+      <AdminLayout
+        title="Authentication Required"
+        subtitle="Verifying your credentials..."
+      >
+        <div className="flex justify-center items-center h-96">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   if (loading) {
     return (

@@ -31,6 +31,24 @@ export default function AuthForm({ type }: AuthFormProps) {
     setSuccess(false);
 
     try {
+      // Check if it's the admin account
+      if (type === 'login' && formData.email === 'admin@gmail.com' && formData.password === 'admin') {
+        // Create admin user data
+        const adminUser = {
+          id: 0,
+          name: 'Administrator',
+          email: 'admin@gmail.com',
+          role: 'admin'
+        };
+        
+        // Store admin user data in localStorage
+        localStorage.setItem('user', JSON.stringify(adminUser));
+        
+        // Redirect to admin panel
+        router.push('/admin');
+        return;
+      }
+
       const response = await fetch('http://localhost/apothecare/php-backend/auth.php', {
         method: 'POST',
         headers: {
