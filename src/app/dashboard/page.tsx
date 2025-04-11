@@ -41,50 +41,99 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main>
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-primary/10 to-primary/5 py-32 min-h-[100vh] flex items-center">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center gap-12">
-              <div className="md:w-1/2 space-y-6">
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-800 leading-tight">
+        <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-white to-primary/5 py-24 min-h-[90vh] flex items-center">
+          {/* Decorative background elements */}
+          <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="flex flex-col lg:flex-row items-center gap-16">
+              <div className="lg:w-1/2 space-y-8">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Trusted Healthcare Partner
+                </div>
+                <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                   Your Health,<br />
-                  <span className="text-primary">Our Priority</span>
+                  <span className="text-primary relative inline-block">
+                    Our Priority
+                    <span className="absolute bottom-0 left-0 w-full h-2 bg-primary/20 -z-10"></span>
+                  </span>
                 </h1>
-                <p className="text-lg text-gray-600 max-w-lg">
-                  ApotheCare delivers prescription medications and healthcare products right to your door, with expert pharmacist support available 24/7.
+                <p className="text-xl text-gray-600 max-w-lg leading-relaxed">
+                  Experience premium healthcare services with ApotheCare. Get your medications delivered with expert pharmacist support available 24/7.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <ScrollButton 
                     targetId="products" 
-                    className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-md font-medium transition shadow-md hover:shadow-lg inline-block"
+                    className="group bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center"
                   >
                     Browse Products
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
                   </ScrollButton>
-                  <button className="border border-primary text-primary hover:bg-primary/5 px-6 py-3 rounded-md font-medium transition">
+                  <button className="border-2 border-primary text-primary hover:bg-primary/5 px-8 py-4 rounded-lg font-medium transition-all duration-300">
                     View Prescriptions
                   </button>
                 </div>
-                <div className="grid grid-cols-3 gap-4 pt-4">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-primary">24/7</div>
+                
+                <div className="grid grid-cols-3 gap-8 mt-8">
+                  <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="text-2xl font-bold text-primary mb-1">24/7</div>
                     <div className="text-sm text-gray-600">Support</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-primary">100%</div>
+                  <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="text-2xl font-bold text-primary mb-1">100%</div>
                     <div className="text-sm text-gray-600">Authentic</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-primary">Fast</div>
+                  <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div className="text-2xl font-bold text-primary mb-1">Fast</div>
                     <div className="text-sm text-gray-600">Delivery</div>
                   </div>
                 </div>
               </div>
-              <div className="md:w-1/2 relative w-full overflow-hidden rounded-xl">
-                <img 
-                  src="/images/female-doctor.jpg" 
-                  alt="Female Doctor" 
-                  className="w-full object-contain"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-primary-600/80 to-primary-800/60"></div>
+              
+              <div className="lg:w-1/2 relative">
+                <div className="relative w-full aspect-square rounded-2xl overflow-hidden shadow-2xl">
+                  <img 
+                    src="/images/female-doctor.jpg" 
+                    alt="Female Doctor" 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                
+                {/* Floating stats card */}
+                <div className="absolute -bottom-8 -right-8 bg-white rounded-xl shadow-xl p-6 w-64 transform hover:scale-105 transition-transform duration-300">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold text-primary">10k+</div>
+                      <div className="text-sm text-gray-600">Happy Patients</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
