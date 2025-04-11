@@ -17,8 +17,8 @@ try {
             // Haal winkelwagen items op
             $stmt = $pdo->prepare("
                 SELECT c.id as cart_id, c.quantity, p.* 
-            FROM cart c
-            JOIN products p ON c.product_id = p.id
+                FROM cart c
+                JOIN products p ON c.product_id = p.id
                 WHERE c.session_id = ?
             ");
             $stmt->execute([$_SESSION['id']]);
@@ -38,7 +38,7 @@ try {
                         'sale_price' => $item['sale_price'] ? floatval($item['sale_price']) : null,
                         'rating' => floatval($item['rating']),
                         'reviews' => intval($item['reviews']),
-                        'properties' => $item['properties'] ? json_decode($item['properties']) : null,
+                        'properties' => $item['properties'],
                         'is_new' => (bool)$item['is_new'],
                         'is_featured' => (bool)$item['is_featured'],
                         'image_url' => $item['image_url'] ?? null
@@ -56,8 +56,8 @@ try {
             if (!isset($data['product_id']) || !isset($data['quantity'])) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Product ID and quantity are required']);
-        exit;
-    }
+                exit;
+            }
     
             // Controleer of product bestaat
             $stmt = $pdo->prepare("SELECT id FROM products WHERE id = ?");
@@ -65,8 +65,8 @@ try {
             if (!$stmt->fetch()) {
                 http_response_code(404);
                 echo json_encode(['error' => 'Product not found']);
-        exit;
-    }
+                exit;
+            }
     
             // Controleer of item al in winkelwagen zit
             $stmt = $pdo->prepare("
@@ -86,7 +86,7 @@ try {
                 ");
                 $stmt->execute([$data['quantity'], $existingItem['id']]);
                 $cartId = $existingItem['id'];
-    } else {
+            } else {
                 // Voeg nieuw item toe
                 $stmt = $pdo->prepare("
                     INSERT INTO cart (session_id, product_id, quantity) 
@@ -119,7 +119,7 @@ try {
                     'sale_price' => $item['sale_price'] ? floatval($item['sale_price']) : null,
                     'rating' => floatval($item['rating']),
                     'reviews' => intval($item['reviews']),
-                    'properties' => $item['properties'] ? json_decode($item['properties']) : null,
+                    'properties' => $item['properties'],
                     'is_new' => (bool)$item['is_new'],
                     'is_featured' => (bool)$item['is_featured'],
                     'image_url' => $item['image_url'] ?? null
@@ -142,8 +142,8 @@ try {
             if (!isset($data['quantity'])) {
                 http_response_code(400);
                 echo json_encode(['error' => 'Hoeveelheid is vereist']);
-        exit;
-    }
+                exit;
+            }
     
             // Controleer of item in winkelwagen bestaat
             $stmt = $pdo->prepare("
@@ -155,8 +155,8 @@ try {
             if (!$stmt->fetch()) {
                 http_response_code(404);
                 echo json_encode(['error' => 'Winkelwagen item niet gevonden']);
-        exit;
-    }
+                exit;
+            }
     
             // Update hoeveelheid
             $stmt = $pdo->prepare("
@@ -189,7 +189,7 @@ try {
                     'sale_price' => $item['sale_price'] ? floatval($item['sale_price']) : null,
                     'rating' => floatval($item['rating']),
                     'reviews' => intval($item['reviews']),
-                    'properties' => $item['properties'] ? json_decode($item['properties']) : null,
+                    'properties' => $item['properties'],
                     'is_new' => (bool)$item['is_new'],
                     'is_featured' => (bool)$item['is_featured'],
                     'image_url' => $item['image_url'] ?? null
@@ -215,7 +215,7 @@ try {
                 }
                 
                 echo json_encode(['success' => true, 'message' => 'Item removed successfully']);
-        } else {
+            } else {
                 // Maak winkelwagen leeg
                 $stmt = $pdo->prepare("
                     DELETE FROM cart 

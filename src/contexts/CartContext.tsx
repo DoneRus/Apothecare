@@ -7,20 +7,26 @@ import { cartAPI } from '../services/api';
 // Define the structure of cart item from API
 interface CartItemApiResponse {
   id: number;
-  product_id: number;
-  name: string;
-  category: string;
-  description: string;
-  price: string;
-  rating: string;
-  reviews: number;
-  properties: string | null;
-  is_new: number | boolean;
+  product_id?: number;
+  product: {
+    id: number;
+    name: string;
+    category: string;
+    description: string;
+    price: string;
+    sale_price?: string;
+    rating: string;
+    reviews: number;
+    properties: string | null;
+    is_new: number | boolean;
+    is_featured: number | boolean;
+    image_url?: string;
+  };
   quantity: number;
 }
 
 type CartItem = {
-  id: number;  // Cart item ID
+  id: number;
   product: Product;
   quantity: number;
 }
@@ -65,15 +71,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const transformedItems = cartItems.map((item: CartItemApiResponse) => ({
           id: item.id,
           product: {
-            id: item.product_id,
-            name: item.name,
-            category: item.category,
-            description: item.description,
-            price: parseFloat(item.price),
-            rating: parseFloat(item.rating),
-            reviews: item.reviews,
-            properties: item.properties ? JSON.parse(item.properties) : {},
-            is_new: Boolean(item.is_new),
+            id: item.product.id,
+            name: item.product.name,
+            category: item.product.category,
+            description: item.product.description,
+            price: parseFloat(item.product.price),
+            sale_price: item.product.sale_price ? parseFloat(item.product.sale_price) : undefined,
+            rating: parseFloat(item.product.rating),
+            reviews: item.product.reviews,
+            properties: typeof item.product.properties === 'string' 
+              ? JSON.parse(item.product.properties) 
+              : (item.product.properties || {}),
+            is_new: Boolean(item.product.is_new),
+            is_featured: Boolean(item.product.is_featured),
+            image_url: item.product.image_url
           },
           quantity: item.quantity
         }));
@@ -105,15 +116,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const transformedItems = cartItems.map((item: CartItemApiResponse) => ({
         id: item.id,
         product: {
-          id: item.product_id,
-          name: item.name,
-          category: item.category,
-          description: item.description,
-          price: parseFloat(item.price),
-          rating: parseFloat(item.rating),
-          reviews: item.reviews,
-          properties: item.properties ? JSON.parse(item.properties) : {},
-          is_new: Boolean(item.is_new),
+          id: item.product.id,
+          name: item.product.name,
+          category: item.product.category,
+          description: item.product.description,
+          price: parseFloat(item.product.price),
+          sale_price: item.product.sale_price ? parseFloat(item.product.sale_price) : undefined,
+          rating: parseFloat(item.product.rating),
+          reviews: item.product.reviews,
+          properties: typeof item.product.properties === 'string' 
+            ? JSON.parse(item.product.properties) 
+            : (item.product.properties || {}),
+          is_new: Boolean(item.product.is_new),
+          is_featured: Boolean(item.product.is_featured),
+          image_url: item.product.image_url
         },
         quantity: item.quantity
       }));
@@ -148,16 +164,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setError(null);
     
     try {
-      // Find the item first
-      const itemToUpdate = items.find(item => item.id === cartItemId);
-      
-      if (!itemToUpdate) {
-        throw new Error('Item not found in cart');
-      }
-      
-      // Remove and re-add with new quantity
-      await cartAPI.removeItem(cartItemId);
-      await cartAPI.addItem(itemToUpdate.product.id, quantity);
+      await cartAPI.updateQuantity(cartItemId, quantity);
       
       // Refetch cart after update
       const cartItems = await cartAPI.getItems();
@@ -166,15 +173,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const transformedItems = cartItems.map((item: CartItemApiResponse) => ({
         id: item.id,
         product: {
-          id: item.product_id,
-          name: item.name,
-          category: item.category,
-          description: item.description,
-          price: parseFloat(item.price),
-          rating: parseFloat(item.rating),
-          reviews: item.reviews,
-          properties: item.properties ? JSON.parse(item.properties) : {},
-          is_new: Boolean(item.is_new),
+          id: item.product.id,
+          name: item.product.name,
+          category: item.product.category,
+          description: item.product.description,
+          price: parseFloat(item.product.price),
+          sale_price: item.product.sale_price ? parseFloat(item.product.sale_price) : undefined,
+          rating: parseFloat(item.product.rating),
+          reviews: item.product.reviews,
+          properties: typeof item.product.properties === 'string' 
+            ? JSON.parse(item.product.properties) 
+            : (item.product.properties || {}),
+          is_new: Boolean(item.product.is_new),
+          is_featured: Boolean(item.product.is_featured),
+          image_url: item.product.image_url
         },
         quantity: item.quantity
       }));
