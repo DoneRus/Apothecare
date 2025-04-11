@@ -58,12 +58,15 @@ export function ExpandableProductsSection({
     setAnimatingProduct(product);
     setLoadingProducts(prev => ({ ...prev, [product.id]: true }));
     
-    addToCart({
+    // Convert from API Product type to CartContext Product type
+    const cartProduct = {
       id: product.id.toString(),
       name: product.name,
       price: product.price,
-      image: product.image || '/images/product-placeholder.jpg',
-    });
+      image: product.image_url || '/images/product-placeholder.jpg',
+    };
+    
+    addToCart(cartProduct);
   };
 
   const toggleExpanded = () => {
@@ -293,7 +296,7 @@ export function ExpandableProductsSection({
           </AnimatePresence>
           
           {/* Expand/Collapse Button - only show if we have additional products */}
-          {allProducts.length > 6 && (
+          {allProducts.length > featuredProducts.length && (
             <div className="flex justify-center mt-10">
               <button
                 onClick={toggleExpanded}

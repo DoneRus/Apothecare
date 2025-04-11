@@ -355,65 +355,7 @@ export default function DashboardPage() {
             <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full -translate-x-1/2 translate-y-1/2 blur-3xl"></div>
             
-            <div className="container mx-auto px-4 relative z-10">
-              <div className="text-center mb-16">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full text-primary text-sm font-medium mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Quality Healthcare
-                </div>
-                <h2 className="text-4xl font-bold text-gray-800 mb-4">Featured <span className="text-primary relative inline-block">
-                  Products
-                  <span className="absolute bottom-0 left-0 w-full h-2 bg-primary/20 -z-10"></span>
-                </span></h2>
-                <p className="text-gray-600 max-w-2xl mx-auto text-lg">
-                  Discover our carefully curated selection of premium healthcare products, all backed by our quality guarantee.
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <ProductCard
-                  id="product1"
-                  name="Premium Multivitamin Complex"
-                  price={29.99}
-                  discountPrice={39.99}
-                  image="/images/product1.jpg"
-                  badge="New Arrival"
-                  reviews={128}
-                />
-                
-                <ProductCard
-                  id="product2"
-                  name="Immune Support Formula"
-                  price={24.99}
-                  discountPrice={29.99}
-                  image="/images/product2.jpg"
-                  badge="Best Seller"
-                  reviews={256}
-                />
-                
-                <ProductCard
-                  id="product3"
-                  name="Natural Sleep Aid"
-                  price={19.99}
-                  discountPrice={24.99}
-                  image="/images/product3.jpg"
-                  badge="Limited Stock"
-                  reviews={192}
-                />
-              </div>
-              
-              {/* View All Products Button */}
-              <div className="text-center mt-12">
-                <button className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl">
-                  View All Products
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                  </svg>
-                </button>
-              </div>
-            </div>
+            <ExpandableProductsSection />
           </section>
         </AnimatedSection>
 
