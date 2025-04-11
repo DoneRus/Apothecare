@@ -16,7 +16,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
+      <header className="bg-white border-b border-gray-100 fixed top-0 left-0 right-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-5 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-9 h-9 text-primary">
@@ -39,7 +39,7 @@ export default function DashboardPage() {
       </header>
 
       {/* Main Content */}
-      <main>
+      <main className="pt-24">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-white to-primary/5 py-24 min-h-[90vh] flex items-center">
           {/* Decorative background elements */}
