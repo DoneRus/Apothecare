@@ -1,18 +1,14 @@
-import { Metadata } from 'next';
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { ScrollButton } from '../../components/ui/ScrollButton';
 import { ExpandableProductsSection } from '../../components/ui/ExpandableProductsSection';
 import { HeaderNavigation } from '../../components/ui/HeaderNavigation';
 import { HeaderCartButton } from '../../components/ui/HeaderCartButton';
-import { TestimonialsSection } from '../../components/ui/TestimonialsSection';
+import { TestimonialsSection } from '@/components/ui/TestimonialsSection';
 import { AnimatedSection } from '@/components/ui/AnimatedSection';
 import { ProductCard } from '@/components/ui/ProductCard';
-
-export const metadata: Metadata = {
-  title: 'Dashboard | ApotheCare',
-  description: 'Your trusted online pharmacy for all healthcare needs',
-};
 
 export default function DashboardPage() {
   return (
