@@ -7,8 +7,8 @@ import ChatWidget from '@/components/AI/ChatWidget';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'ApotheCare - Online Pharmacy',
-  description: 'Your trusted online pharmacy for all your healthcare needs',
+  title: 'ApotheCare - Your Health, Our Priority',
+  description: 'Premium online pharmacy and healthcare services',
 };
 
 export default function RootLayout({

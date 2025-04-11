@@ -2,10 +2,10 @@
 
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { useCart } from '../../contexts/CartContext';
+import { useCart } from '@/context/CartContext';
 
 export function HeaderCartButton() {
-  const { itemCount } = useCart();
+  const { totalItems: itemCount } = useCart();
   const [bump, setBump] = useState(false);
   
   // Add animation effect when item count changes

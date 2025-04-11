@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AddToCartAnimation } from './AddToCartAnimation';
-import { useCart } from '../../contexts/CartContext';
+import { useCart } from '@/context/CartContext';
 import { productsAPI } from '../../services/api';
 import { Product } from '../../data/products';
 
@@ -24,7 +24,7 @@ export function ExpandableProductsSection({
   const [allProducts, setAllProducts] = useState<Product[]>(initialAllProducts || []);
   const [loadingProducts, setLoadingProducts] = useState<Record<number, boolean>>({});
   
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -54,22 +54,16 @@ export function ExpandableProductsSection({
   }, [initialFeaturedProducts, initialAllProducts]);
   
   // Function to handle adding product to cart
-  const handleAddToCart = async (product: Product) => {
-    try {
-      // Set loading state for this specific product
-      setLoadingProducts(prev => ({ ...prev, [product.id]: true }));
-      
-      setAnimatingProduct(product);
-      await addItem(product, 1);
-    } catch (error) {
-      console.error('Failed to add item to cart:', error);
-      // You might want to show an error toast here
-    } finally {
-      // Clear loading state for this specific product
-      setTimeout(() => {
-        setLoadingProducts(prev => ({ ...prev, [product.id]: false }));
-      }, 500); // Small delay to ensure animation completes
-    }
+  const handleAddToCart = (product: Product) => {
+    setAnimatingProduct(product);
+    setLoadingProducts(prev => ({ ...prev, [product.id]: true }));
+    
+    addToCart({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      image: product.image || '/images/product-placeholder.jpg',
+    });
   };
 
   const toggleExpanded = () => {

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { useCart } from '@/contexts/CartContext';
+import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 
 const containerVariants = {
@@ -31,7 +31,7 @@ const itemVariants = {
 };
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, clearCart, totalPrice, loading, error } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart, totalPrice, loading, error } = useCart();
 
   if (loading) {
     return (
@@ -75,7 +75,7 @@ export default function CartPage() {
     );
   }
 
-  if (items.length === 0) {
+  if (cart.length === 0) {
     return (
       <motion.div 
         initial="hidden"
@@ -117,7 +117,7 @@ export default function CartPage() {
           <div className="flex justify-between items-center mb-8 border-b pb-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-800 mb-2">Shopping Cart</h1>
-              <p className="text-gray-500">{items.length} {items.length === 1 ? 'item' : 'items'} in your cart</p>
+              <p className="text-gray-500">{cart.length} {cart.length === 1 ? 'item' : 'items'} in your cart</p>
             </div>
             <Button 
               variant="ghost" 
@@ -132,18 +132,18 @@ export default function CartPage() {
           </div>
 
           <div className="space-y-6">
-            {items.map((item) => (
+            {cart.map((item) => (
               <motion.div
                 key={item.id}
                 variants={itemVariants}
                 className="flex items-center justify-between border border-gray-100 rounded-xl p-6 hover:shadow-md transition-shadow duration-200"
               >
                 <div className="flex items-center space-x-6">
-                  {item.product.image_url ? (
+                  {item.image ? (
                     <div className="relative w-24 h-24">
                       <img
-                        src={item.product.image_url}
-                        alt={item.product.name}
+                        src={item.image}
+                        alt={item.name}
                         className="w-full h-full object-cover rounded-lg shadow-sm"
                       />
                     </div>
@@ -155,10 +155,10 @@ export default function CartPage() {
                     </div>
                   )}
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">{item.product.name}</h3>
-                    <p className="text-gray-600 text-sm mb-2 line-clamp-1">{item.product.description}</p>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">{item.name}</h3>
+                    <p className="text-gray-600 text-sm mb-2 line-clamp-1">Premium healthcare product</p>
                     <p className="text-[#10B981] font-medium">
-                      €{((item.product.sale_price || item.product.price) * item.quantity).toFixed(2)}
+                      €{(item.price * (item.quantity || 1)).toFixed(2)}
                     </p>
                     </div>
                   </div>
@@ -167,17 +167,17 @@ export default function CartPage() {
                   <div className="flex items-center space-x-1">
                     <Button
                       variant="ghost"
-                      onClick={() => item.id && updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                      onClick={() => updateQuantity(item.id, Math.max(1, (item.quantity || 1) - 1))}
                       className="text-gray-600 hover:text-[#10B981] hover:bg-gray-100 p-2 rounded-full"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
                         </svg>
                     </Button>
-                    <span className="w-12 text-center font-medium text-gray-700">{item.quantity}</span>
+                    <span className="w-12 text-center font-medium text-gray-700">{item.quantity || 1}</span>
                     <Button
                       variant="ghost"
-                      onClick={() => item.id && updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => updateQuantity(item.id, (item.quantity || 1) + 1)}
                       className="text-gray-600 hover:text-[#10B981] hover:bg-gray-100 p-2 rounded-full"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -188,7 +188,7 @@ export default function CartPage() {
 
                   <Button
                     variant="ghost"
-                    onClick={() => item.id && removeItem(item.id)}
+                    onClick={() => removeFromCart(item.id)}
                     className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-full"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">

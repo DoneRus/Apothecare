@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import { CartProvider } from './contexts/CartContext';
+import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 
 interface ProvidersProps {
